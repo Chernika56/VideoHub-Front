@@ -1,0 +1,114 @@
+@import './base.css';
+
+div {
+    unicode-bidi: isolate;
+}
+
+a {
+    color: #337ab7;
+    text-decoration: none;
+}
+
+a:focus {
+    outline: 5px auto -webkit-focus-ring-color;
+    outline-offset: -2px;
+}
+
+a:hover, 
+a:active, 
+a:focus {
+    color: #23527c;
+    text-decoration: underline;
+    outline: none;
+}
+
+img {
+    max-width: 100%;
+}
+
+header {
+    display: block;
+    unicode-bidi: isolate;
+}
+
+button {
+    font-family: "Roboto", sans-serif;
+    cursor: pointer;
+}
+
+button:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+button:hover,
+button:active,
+button:focus {
+    outline: none !important;
+}
+
+i {
+    font-style: italic;
+}
+
+button i {
+    pointer-events: none;
+}
+
+nav {
+    width: 170px;
+    left: 0;
+    top: 42px;
+    bottom: 0;
+    position: fixed;
+    border-radius: 0;
+    background-color: var(--primaryColorMain, #444951);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+}
+
+ul {
+    display: block;
+    list-style-type: disc;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    padding-inline-start: 40px;
+    unicode-bidi: isolate;
+}
+/*#app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-weight: normal;
+}
+
+a,
+.green {
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+  padding: 3px;
+}
+
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
+}
+
+@media (min-width: 1024px) {
+  body {
+    display: flex;
+    place-items: center;
+  }
+
+  #app {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 0 2rem;
+  }
+}*/
