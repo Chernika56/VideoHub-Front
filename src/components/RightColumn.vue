@@ -1,26 +1,21 @@
 <script setup>
+import { profilePopupState } from '@/stores/profilePopup';
 
-defineProps({
-  language: {
-      type: String,
-      required: true
-    },
-    person: {
-      type: String,
-      required: true
-    },
-})
+const openPopup = (event) => {
+  event.stopPropagation(); // Останавливаем распространение события
+  profilePopupState.togglePopup(); // Открыть попап
+}
 </script>
 
 <template>
   <div class="rightColumn">
     <button type="button" class="languageButton">
-      {{ language }}
-      <!--<i>arrow_drop_down</i>-->
+      RU
     </button>
-    <button type="button" class="profileButton">
-      <!--<i>person</i>-->
-      {{ person }}
+    
+    <!-- Кнопка профиля -->
+    <button type="button" class="profileButton" @click="openPopup">
+      Профиль
     </button>
   </div>
 </template>
@@ -57,6 +52,13 @@ defineProps({
   transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms
 }
 
+.languageButton:hover,
+.languageButton:active,
+.languageButton:focus {
+  color: var(--textHeaderColorAccent, #f1f1f1) !important;
+  background-color: var(--textHeaderColorTransparent, rgba(255, 255, 255, 0.3)) !important;
+}
+
 .profileButton {
   font-size: 13px;
   line-height: 16px;
@@ -82,5 +84,12 @@ defineProps({
   position: relative;
   white-space: nowrap;
   transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+}
+
+.profileButton:hover,
+.profileButton:active,
+.profileButton:focus {
+  color: var(--textHeaderColorAccent, #f1f1f1) !important;
+  background-color: var(--textHeaderColorTransparent, rgba(255, 255, 255, 0.3)) !important;
 }
 </style>

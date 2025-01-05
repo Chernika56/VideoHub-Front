@@ -1,10 +1,13 @@
 <script setup>
+import { useRoute } from 'vue-router'
+import { ref, watch } from 'vue'
 
-defineProps({
-  title: {
-    type: String,
-    required: true
-  }
+const route = useRoute()
+
+const title = ref(route.meta.title || "Title")
+
+watch(() => route.meta.title, (newTitle) => {
+  title.value = newTitle || "Title"
 })
 </script>
 

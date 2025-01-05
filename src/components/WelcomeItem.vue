@@ -13,13 +13,9 @@
 </template>
 
 <style scoped>
-@media (min-width: 991px) {
-  .item {
-    left: 170px;
-  }
-}
 
 .item {
+  left: 170px;
   position: fixed;
   top: 42px;
   bottom: 0;

@@ -1,10 +1,11 @@
 <script setup>
+import { authState } from '@/stores/auth.js'
 import { RouterView } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
 import AppNav from '@/components/AppNav.vue'
 
 const collectionNav = [
-  { title: 'about', text: 'Камеры' },
+  { title: 'cameras', text: 'Камеры' },
   { title: 'star', text: 'Изображение' },
   { title: 'apps', text: 'Мозайки' },
   { title: 'explore', text: 'Карта' }
@@ -26,11 +27,14 @@ const collectionFooter = [
 </script>
 
 <template>
-  <AppHeader />
-  <AppNav :collection-nav="collectionNav" :collection-settings="collectionSettings" />
-  <main>
-    <RouterView />
-  </main>
+  <v-app>
+    <AppHeader v-if="authState.isAuthenticated" />
+    <AppNav v-if="authState.isAuthenticated" :collection-nav="collectionNav"
+      :collection-settings="collectionSettings" />
+    <v-main>
+      <router-view />
+    </v-main>
+  </v-app>
 </template>
 
 <style scoped>

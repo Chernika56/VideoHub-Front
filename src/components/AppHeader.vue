@@ -3,7 +3,6 @@ import MainColumn from '@/components/MainColumn.vue'
 import RightColumn from '@/components/RightColumn.vue'
 import { RouterLink } from 'vue-router'
 
-let title = "Title"
 let language = "RU"
 let person = "Admin"
 </script>
@@ -13,7 +12,7 @@ let person = "Admin"
         <RouterLink to="/" class="logo">
             <img alt="Vue logo" class="logoImg" src="@/assets/logo.svg" />
         </RouterLink>
-        <MainColumn :title=title />
+        <MainColumn />
         <RightColumn :language=language :person=person />
     </header>
 </template>
