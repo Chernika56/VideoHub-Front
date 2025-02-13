@@ -1,23 +1,22 @@
 {
-  "name": "frontend",
-  "version": "0.0.0",
+  "name": "nuxt-app",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@pinia/nuxt": "^0.9.0",
     "@videojs-player/vue": "^1.0.0",
-    "axios": "^1.7.9",
-    "video.js": "^8.21.0",
-    "vue": "^3.5.12",
-    "vue-router": "^4.4.5"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-vue": "^5.1.4",
-    "vite": "^5.4.10",
-    "vite-plugin-vue-devtools": "^7.5.4"
+    "nuxt": "^3.15.4",
+    "vue": "latest",
+    "vue-datepicker-next": "^1.0.3",
+    "vue-router": "latest",
+    "vue-video-player": "^6.0.0",
+    "vuetify": "^3.7.11"
   }
 }
