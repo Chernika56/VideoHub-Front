@@ -1,0 +1,28 @@
+# Игнорируем все файлы node_modules
+node_modules
+
+.nuxt
+.output
+
+# Игнорируем папки и файлы для тестов
+test
+tests
+*.test.js
+*.spec.js
+
+# Игнорируем временные файлы IDE
+.vscode
+.idea
+*.sublime-workspace
+*.sublime-project
+
+# Игнорируем файлы логов
+*.log
+
+# Игнорируем временные файлы операционной системы
+.DS_Store
+Thumbs.db
+
+# Игнорируем файлы, связанные с деплоем на другие платформы
+docker-compose.override.yml
+.env

@@ -9,11 +9,42 @@ const errorMessage = ref(''); // Сообщение об ошибке
 const maxRetries = 3; // Максимальное количество попыток
 let retryCount = 0; // Счетчик попыток
 
+
+const filter = ref({
+    search: '',
+    dvr_depth: '',
+    streamer: '',
+    organization_id: '',
+    dvr_enabled: false,
+    agent: false,
+    onvif: false,
+    vision_enabled: false,
+    enabled: false,
+});
+
+const resetFilters = () => {
+    filter.value = {
+        search: '',
+        dvr_depth: '',
+        streamer: '',
+        organization_id: '',
+        dvr_enabled: false,
+        agent: false,
+        onvif: false,
+        vision_enabled: false,
+        enabled: false,
+    };
+};
+
 // Функция для загрузки списка видео
 const fetchVideos = async () => {
     try {
-        const { data } = await useFetch('/api/cameras');
+        console.log(filter)
 
+        const { data } = await useFetch('/api/cameras', {
+            method: 'GET',
+            query: { ...filter.value },
+        });
         console.log(`Попытка ${retryCount + 1}:`, data.value);
 
         if (!data.value && retryCount < maxRetries) {
@@ -84,31 +115,9 @@ onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside);
 });
 
-const filter = ref({
-    search: '',
-    dvrDepth: '',
-    streamer: '',
-    organization: '',
-    archive: false,
-    agent: false,
-    onvif: false,
-    anpr: false,
-    enabled: false,
-});
-
-const resetFilters = () => {
-    filter.value = {
-        search: '',
-        dvrDepth: '',
-        streamer: '',
-        organization: '',
-        archive: false,
-        agent: false,
-        onvif: false,
-        anpr: false,
-        enabled: false,
-    };
-};
+watch(filter, (newFilter, oldFilter) => {
+    fetchVideos();
+}, { deep: true });
 
 const tableColumns = ref({
     // status: { label: "Статус", custom: false, visible: true },
@@ -118,7 +127,7 @@ const tableColumns = ref({
     ipAddress: { label: "IP-адрес", custom: true, visible: true },
     streamer: { label: "Стример", custom: true, visible: true },
     preset: { label: "Пресет", custom: true, visible: true },
-    dvrDepth: { label: "Архив", custom: true, visible: true },
+    dvr_depth: { label: "Архив", custom: true, visible: true },
     dvrLimit: { label: "Лимит DVR (дни)", custom: true, visible: false },
     dvrSpace: { label: "Пространство DVR", custom: true, visible: false },
 });
@@ -131,7 +140,7 @@ const resetColumns = () => {
     tableColumns.value['streamUrl'].visible = false;
     tableColumns.value['subStreamUrl'].visible = false;
     tableColumns.value['preset'].visible = true;
-    tableColumns.value['dvrDepth'].visible = true;
+    tableColumns.value['dvr_depth'].visible = true;
     tableColumns.value['ipAddress'].visible = true;
     tableColumns.value['dvrLimit'].visible = false;
     tableColumns.value['streamer'].visible = true;
@@ -143,8 +152,8 @@ const resetColumns = () => {
 <template>
     <div class="pageContent">
         <div class="toolbar">
-            <h2 v-if="errorMessage" class="error">{{ errorMessage }}</h2>
-            <h2 v-else-if="videos == null">Загрузка...</h2>
+            <h2 v-if="videos == null">Загрузка...</h2>
+            <!-- <h2 v-if="errorMessage" class="error">{{ errorMessage }}</h2> -->
             <div class="buttons">
                 <button class="button" @click="toggleColumnsMenu">📊 Столбцы</button>
                 <div v-if="showColumnsMenu" class="dropdown-menu" ref="columnsMenu">
@@ -162,15 +171,15 @@ const resetColumns = () => {
                 <button class="button" @click="toggleFilterMenu">🔍 Фильтр</button>
                 <div v-if="showFilterMenu" class="dropdown-menu" ref="filterMenu">
                     <input class="input-field" type="text" placeholder="🔍 Поиск..." v-model="filter.search">
-                    <input class="input-field" type="text" placeholder="Глубина DVR" v-model="filter.dvrDepth">
+                    <input class="input-field" type="text" placeholder="Глубина DVR" v-model="filter.dvr_depth">
                     <input class="input-field" type="text" placeholder="Стример" v-model="filter.streamer">
-                    <input class="input-field" type="text" placeholder="Организация" v-model="filter.organization">
+                    <input class="input-field" type="text" placeholder="Организация" v-model="filter.organization_id">
 
                     <div class="checkbox-group">
-                        <label><input type="checkbox" v-model="filter.archive"> Архив</label>
+                        <label><input type="checkbox" v-model="filter.dvr_enabled"> Архив</label>
                         <label><input type="checkbox" v-model="filter.agent"> Agent</label>
                         <label><input type="checkbox" v-model="filter.onvif"> ONVIF</label>
-                        <label><input type="checkbox" v-model="filter.anpr"> ANPR</label>
+                        <label><input type="checkbox" v-model="filter.vision_enabled"> ANPR</label>
                         <label><input type="checkbox" v-model="filter.enabled"> Включена</label>
                     </div>
                     <button class="reset-button" @click="resetFilters">🧹 Очистить фильтры</button>
@@ -214,7 +223,7 @@ const resetColumns = () => {
                             {{ video.preset.title }}
                         </td>
 
-                        <td v-else-if="column.visible && key === 'dvrDepth'" :class="key">
+                        <td v-else-if="column.visible && key === 'dvr_depth'" :class="key">
                             {{ video.dvr_depth == 1 ? "1 day" : video.dvr_depth ? `${video.dvr_depth} days` : '' }}
                         </td>
 

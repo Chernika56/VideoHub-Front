@@ -56,16 +56,18 @@ export default class Flussonic {
         return this.urlBase + parts.join('/');
     }
 
-    async getStreams(options = {}) {
+    async getStreams(filter = {}) {
         const queryParams = new URLSearchParams();
 
-        for (const [key, value] of Object.entries(options)) {
-            if (value !== undefined && value !== null) {
+        for (const [key, value] of Object.entries(filter)) {
+            if (value !== undefined && value !== null && value !== '' && value !== 'false') {
                 queryParams.append(key, value);
             }
         }
 
         const url = this.#getFullUrl('cameras') + (queryParams.toString() ? `?${queryParams.toString()}` : '');
+
+        console.log(url)
         const streams = await this.#doRequest(url);
         streams.forEach(s => {
             const token = s.playback_config.token;

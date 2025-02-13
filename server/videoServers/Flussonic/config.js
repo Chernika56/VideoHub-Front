@@ -1,7 +1,7 @@
-import * as path from "node:path";
+import { resolve } from 'path';
 import * as fs from "node:fs/promises";
 
-const filePath = "D:\\Diplom\\FrontEnd-Nuxt\\config.json"
+const filePath = resolve(process.cwd(), 'config.json');
 
 export default async function getConfig() {
   try {
