@@ -26,3 +26,5 @@ Thumbs.db
 # Игнорируем файлы, связанные с деплоем на другие платформы
 docker-compose.override.yml
 .env
+
+request

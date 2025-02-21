@@ -5,10 +5,31 @@ definePageMeta({
 })
 
 const videos = ref([]); // Список видео
+const organizations = ref([]);
+const folders = ref([]);
 const errorMessage = ref(''); // Сообщение об ошибке
 const maxRetries = 3; // Максимальное количество попыток
 let retryCount = 0; // Счетчик попыток
 
+const dvr_depth_list = ref([
+    // { title: 'Любой', value: '' },
+    // { title: 'По движению', value: '0.125' },
+    { title: '1 день', value: '1' },
+    { title: '2 дня', value: '2' },
+    { title: '3 дня', value: '3' },
+    { title: '4 дня', value: '4' },
+    { title: '5 дней', value: '5' },
+    { title: '6 дней', value: '6' },
+    { title: '1 неделя', value: '7' },
+    { title: '10 дней', value: '10' },
+    { title: '2 недели', value: '14' },
+    { title: '1 месяц', value: '30' },
+    { title: '40 дней', value: '40' },
+    { title: '2 месяца', value: '60' },
+    { title: '3 месяца', value: '90' },
+    { title: '6 месяцев', value: '180' },
+    { title: '1 год', value: '365' },
+])
 
 const filter = ref({
     search: '',
@@ -20,6 +41,7 @@ const filter = ref({
     onvif: false,
     vision_enabled: false,
     enabled: false,
+    limit: 1000,
 });
 
 const resetFilters = () => {
@@ -33,34 +55,39 @@ const resetFilters = () => {
         onvif: false,
         vision_enabled: false,
         enabled: false,
+        limit: 1000,
     };
 };
+
+const queryFilter = {
+    limit: 1000,
+    sort: 'name',
+}
 
 // Функция для загрузки списка видео
 const fetchVideos = async () => {
     try {
-        console.log(filter)
+        if (retryCount < maxRetries) {
+            const cameras = await useFetch('/api/cameras', {
+                method: 'GET',
+                query: { ...filter.value },
+            });
+            console.log(`Попытка ${retryCount + 1} (камеры):`, cameras.data.value);
 
-        const { data } = await useFetch('/api/cameras', {
-            method: 'GET',
-            query: { ...filter.value },
-        });
-        console.log(`Попытка ${retryCount + 1}:`, data.value);
+            if (!cameras.data.value) {
+                retryCount++;
+                console.warn(`Попытка ${retryCount}: Данные не загрузились, пробуем еще раз через 1 сек...`);
+                setTimeout(fetchVideos, 1000); // Повтор запроса через 1 сек
+                return;
+            }
 
-        if (!data.value && retryCount < maxRetries) {
-            retryCount++;
-            console.warn(`Попытка ${retryCount}: Данные не загрузились, пробуем еще раз через 1 сек...`);
-            setTimeout(fetchVideos, 1000); // Повтор запроса через 1 сек
-            return;
-        }
-
-        if (data.value) {
-            videos.value = data.value;
-            retryCount = 0; // Сброс счетчика после успешной загрузки
+            videos.value = cameras.data.value
+            retryCount = 0
         } else {
-            errorMessage.value = 'Ошибка загрузки списка видео';
-            console.error('Ошибка: превышено количество попыток загрузки.');
+            errorMessage.value = 'Превышено число попыток'
+            console.error(errorMessage.value)
         }
+
     } catch (error) {
         // if (error.response.status === 401) {
         //     alert('Неавторизован. Выход из аккаунта.');
@@ -68,18 +95,126 @@ const fetchVideos = async () => {
         //     router.push('/auth');
         // }
 
-        errorMessage.value = 'Ошибка загрузки списка видео';
+        errorMessage.value = 'Ошибка загрузки видео';
         console.error('Ошибка загрузки видео:', error);
     }
 };
 
+const fetchOrganizations = async () => {
+    try {
+        if (retryCount < maxRetries) {
+            const organizationsData = await useFetch('/api/organizations', {
+                method: 'GET',
+                query: { ...queryFilter },
+            });
+            console.log(`Попытка ${retryCount + 1} (организации):`, organizationsData.data.value)
+
+            if (!organizationsData.data.value) {
+                retryCount++;
+                console.warn(`Попытка ${retryCount}: Данные не загрузились, пробуем еще раз через 1 сек...`);
+                setTimeout(fetchOrganizations, 1000); // Повтор запроса через 1 сек
+                return;
+            }
+
+            organizations.value = organizationsData.data.value
+            retryCount = 0
+        } else {
+            errorMessage.value = 'Превышено число попыток'
+            console.error(errorMessage.value)
+        }
+
+    } catch (error) {
+        // if (error.response.status === 401) {
+        //     alert('Неавторизован. Выход из аккаунта.');
+        //     authState.logout();
+        //     router.push('/auth');
+        // }
+
+        errorMessage.value = 'Ошибка загрузки организаций';
+        console.error('Ошибка загрузки организаций:', error);
+    }
+};
+
+const fetchFolders = async () => {
+    try {
+        if (retryCount < maxRetries) {
+            const foldersData = await useFetch('/api/folders', {
+                method: 'GET',
+                query: { ...queryFilter },
+            });
+            console.log(`Попытка ${retryCount + 1} (папки):`, foldersData.data.value);
+
+            if (!foldersData.data.value) {
+                retryCount++;
+                console.warn(`Попытка ${retryCount}: Данные не загрузились, пробуем еще раз через 1 сек...`);
+                setTimeout(fetchFolders, 1000); // Повтор запроса через 1 сек
+                return;
+            }
+
+            folders.value = foldersData.data.value
+            retryCount = 0
+        } else {
+            errorMessage.value = 'Превышено число попыток'
+            console.error(errorMessage.value)
+        }
+
+    } catch (error) {
+        // if (error.response.status === 401) {
+        //     alert('Неавторизован. Выход из аккаунта.');
+        //     authState.logout();
+        //     router.push('/auth');
+        // }
+
+        errorMessage.value = 'Ошибка загрузки папок';
+        console.error('Ошибка загрузки папок:', error);
+    }
+};
+
+const buildFolderTree = (folders, videos, organizations) => {
+    const folderMap = new Map();
+    const folderTree = [];
+
+    // Копируем папки в Map без изменений
+    folders.forEach(folder => {
+        folderMap.set(folder.id, {
+            ...folder,
+            organization_name: organizations.find(org => org.id === folder.organization_id)?.title || 'Undefined',
+            cameras: videos.filter(video => video.folder_id === folder.id),
+            children: [],
+            isOpen: true,
+        });
+    });
+
+    // Заполняем дерево
+    folderMap.forEach((folder, id) => {
+        if (folder.parent_id && folderMap.has(folder.parent_id)) {
+            folderMap.get(folder.parent_id).children.push(folder);
+        } else {
+            folderTree.push(folder);
+        }
+    });
+
+    const removeEmptyFolders = (folders) => {
+        return folders.filter(folder => {
+            folder.children = removeEmptyFolders(folder.children); // 🔄 Очищаем пустые папки внутри
+
+            return folder.children.length > 0 || folder.cameras.length > 0; // ❌ Удаляем, если нет вложенных папок и камер
+        });
+    };
+
+    // ✅ Сортируем и удаляем пустые папки
+    return removeEmptyFolders(folderTree)
+        .sort((a, b) => a.organization_name.localeCompare(b.organization_name));
+};
+
+
+const folderTree = computed(() => buildFolderTree(folders.value, videos.value, organizations.value));
+
 onMounted(async () => {
     await fetchVideos();
+    await fetchOrganizations();
+    await fetchFolders();
 });
-
-const regex = /@([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)/;
-
-const getStatusClass = (status) => (status ? 'status-green' : 'status-red');
 
 const showColumnsMenu = ref(false);
 const showFilterMenu = ref(false);
@@ -171,9 +306,19 @@ const resetColumns = () => {
                 <button class="button" @click="toggleFilterMenu">🔍 Фильтр</button>
                 <div v-if="showFilterMenu" class="dropdown-menu" ref="filterMenu">
                     <input class="input-field" type="text" placeholder="🔍 Поиск..." v-model="filter.search">
-                    <input class="input-field" type="text" placeholder="Глубина DVR" v-model="filter.dvr_depth">
+                    <select v-model="filter.dvr_depth" class="input-field">
+                        <option value="">Глубина DVR</option>
+                        <option v-for="dvr_depth in dvr_depth_list" :key="dvr_depth.value" :value="dvr_depth.value">
+                            {{ dvr_depth.title }}
+                        </option>
+                    </select>
                     <input class="input-field" type="text" placeholder="Стример" v-model="filter.streamer">
-                    <input class="input-field" type="text" placeholder="Организация" v-model="filter.organization_id">
+                    <select v-model="filter.organization_id" class="input-field">
+                        <option value="">Выберите организацию</option>
+                        <option v-for="org in organizations" :key="org.id" :value="org.id">
+                            {{ org.title }}
+                        </option>
+                    </select>
 
                     <div class="checkbox-group">
                         <label><input type="checkbox" v-model="filter.dvr_enabled"> Архив</label>
@@ -198,59 +343,16 @@ const resetColumns = () => {
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="video in videos" :key="video.name">
-                    <template v-for="(column, key) in tableColumns" :key="key">
-                        <!-- <td v-if="column.visible && key === 'status'" :class="key">
-                            <span :class="['status-dot', getStatusClass(video.stream_status.alive)]"></span>
-                        </td> -->
+                <template v-for="folder in folderTree" :key="folder.id">
+                    <FolderRow :folder="folder" :level="0" :tableColumns="tableColumns" />
+                </template>
 
-                        <td v-if="column.visible && key === 'name'" :class="key">
-                            <span :class="['status-dot', getStatusClass(video.stream_status.alive)]"></span>
-                            <nuxt-link :to="`/VideoPlayer/${video.name}`">
-                                {{ video.title }}
-                            </nuxt-link>
-                        </td>
-
-                        <td v-else-if="column.visible && key === 'streamUrl'" :class="key" :title="video.stream_url">
-                            {{ video.stream_url }}
-                        </td>
-
-                        <td v-else-if="column.visible && key === 'subStreamUrl'" :class="key" :title="video.subкуьщеуstream_url">
-                            {{ video.substream_url }}
-                        </td>
-
-                        <td v-else-if="column.visible && key === 'preset'" :class="key">
-                            {{ video.preset.title }}
-                        </td>
-
-                        <td v-else-if="column.visible && key === 'dvr_depth'" :class="key">
-                            {{ video.dvr_depth == 1 ? "1 day" : video.dvr_depth ? `${video.dvr_depth} days` : '' }}
-                        </td>
-
-                        <td v-else-if="column.visible && key === 'ipAddress'" :class="key">
-                            {{ video.stream_url.match(regex)?.[1] }}
-                        </td>
-
-                        <td v-else-if="column.visible && key === 'dvrLimit'" :class="key">
-
-                        </td>
-
-                        <td v-else-if="column.visible && key === 'streamer'" :class="key">
-                            {{ video.stream_status.server }}
-                            <!-- нужно сделать через получение streamers и через id в streame_id -->
-                        </td>
-
-                        <td v-else-if="column.visible && key === 'dvrSpace'" :class="key">
-                            {{ video.dvr_space }}
-                        </td>
-                    </template>
-                </tr>
             </tbody>
         </table>
     </div>
 </template>
 
-<style scoped>
+<style>
 tbody {
     font-weight: 300;
 }
@@ -358,13 +460,19 @@ h2 {
     margin-top: 20px;
     width: 100%;
     border-collapse: collapse;
-    table-layout: fixed;
+}
+
+.folder-row td {
+    background: #d9eafc;
+    font-weight: bold;
+    text-align: left;
+    padding: 12px;
 }
 
 .camera-table th,
 .camera-table td {
     word-wrap: break-word;
-
+    width: 10%;
     padding: 10px;
     text-align: left;
     border-bottom: 1px solid #ddd;
@@ -372,9 +480,10 @@ h2 {
 
 .camera-table th.name,
 .camera-table td.name {
-    display: flex;
+    width: 20%;
     align-items: center;
-    flex-wrap: nowrap;  /* Prevent the items from wrapping */
+    flex-wrap: nowrap;
+    /* Prevent the items from wrapping */
 }
 
 .camera-table th.streamUrl,
@@ -382,12 +491,12 @@ h2 {
 .camera-table th.subStreamUrl,
 .camera-table td.subStreamUrl,
 .camera-table th.streamer,
-.camera-table td.streamerб
-.camera-table th.name,
+.camera-table td.streamerб .camera-table th.name,
 .camera-table td.name {
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+    max-width: 100px;
 }
 
 .camera-table th {

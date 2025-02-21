@@ -61,6 +61,9 @@ const fetchVideoUrl = async () => {
       const durationInSeconds = Math.round(endDate - startDate) / 1000;
       const index = `index-${startTime}-${durationInSeconds}.m3u8`;
       videoUrl.value = stream.value.videoUrl.replace('index.m3u8', index);
+      //videoUrl.value = stream.value.videoUrl.replace('index.m3u8', 'shoutcast');
+      //videoUrl.value = "http://172.16.0.48/test/embed.html"
+      //videoUrl.value = "http://172.16.0.48/demo/mpegts/index.m3u8"
     } else {
       console.error('Ошибка загрузки данных: превышено количество попыток.');
     }
@@ -104,7 +107,7 @@ onMounted(async () => {
   <div class="video-player-container">
     <VueVideoPlayer ref="player" class="video-js" v-if="videoUrl != null" :src="videoUrl" :poster="stream?.previewUrl"
       @update:height="videoHeight = player.$el.offsetHeight" controls aspectRatio="16:9"
-      :playbackRates="[0.5, 1, 2, 4, 8, 16]" />
+      :playbackRates="[0.5, 1, 2, 4, 8, 16]" /> 
   </div>
   <div class="date-time-container">
     <h2>Выбор периода с датой и временем</h2>

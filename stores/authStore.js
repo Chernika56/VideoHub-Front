@@ -13,7 +13,6 @@ export const useAuthStore = defineStore("auth", {
         });
 
         if (data.value.session) {
-          console.log(8)
           const token = useCookie("token", { sameSite: "lax" });
           token.value = data.session; // Сохраняем токен
           this.authenticated = true;
