@@ -1,6 +1,6 @@
 export default defineEventHandler(async (event) => {
     try {
-        const query = getQuery(event); // Получаем параметры запроса
+        const query = getQuery(event); 
 
         const nitroApp = useNitroApp()
 

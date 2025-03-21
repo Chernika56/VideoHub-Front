@@ -17,7 +17,6 @@ const toggleDropdown = () => {
       RU
     </button>
     
-    <!-- Кнопка профиля -->
     <button type="button" class="profileButton" @click="toggleDropdown">
       Профиль
     </button>

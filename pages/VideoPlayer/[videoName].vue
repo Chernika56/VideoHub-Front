@@ -6,7 +6,6 @@ import { useHead } from '#imports';
 
 const route = useRoute();
 
-// Динамическое обновление заголовка
 definePageMeta({
   title: computed(() => stream.value?.title || 'Камера'),
   //title: 'Камера',
@@ -15,8 +14,8 @@ definePageMeta({
 const player = ref(null);
 const videoUrl = ref(null);
 const stream = ref(null);
-const maxRetries = 3; // Максимальное количество попыток
-let retryCount = 0;   // Счетчик попыток
+const maxRetries = 3; 
+let retryCount = 0;   
 
 const disabled = ref(false);
 
@@ -46,13 +45,13 @@ const fetchVideoUrl = async () => {
     if (!data.value && retryCount < maxRetries) {
       retryCount++;
       console.warn(`Попытка ${retryCount}: Данные не загрузились, пробуем еще раз...`);
-      setTimeout(fetchVideoUrl, 1000); // Повтор запроса через 1 сек
+      setTimeout(fetchVideoUrl, 1000); 
       return;
     }
 
     if (data.value) {
       stream.value = data.value;
-      retryCount = 0; // Сброс счетчика при успешной загрузке
+      retryCount = 0; 
 
       const startDate = timeRange.value[0]
       const endDate = timeRange.value[1]
@@ -114,7 +113,6 @@ onMounted(async () => {
     <p>min: {{ minDate }}</p>
     <p>max: {{ maxDate }}</p>
 
-    <!-- Выбор первой даты с временем -->
     <DatePicker v-model:value="timeRange" type="datetime" :min-date="minDate" :max-date="maxDate" :clearable="false"
       show-time range confirm :disabled="disabled" placeholder="Выберите начальную дату" />
 
@@ -129,39 +127,29 @@ onMounted(async () => {
 <style>
 .video-title {
   text-align: center;
-  /* Центрируем заголовок */
   margin-top: 80px;
   margin-left: 170px;
   font-size: 24px;
-  /* Размер шрифта заголовка */
   color: #333;
-  /* Цвет текста заголовка */
 }
 
 .video-player-container {
   display: flex;
   justify-content: center;
-  /* Центрируем плеер горизонтально */
   align-items: center;
-  /* Центрируем плеер вертикально */
   margin-left: 170px;
-  /* Учет ширины навигационной панели */
   padding-top: 20px;
   padding-bottom: 20px;
   padding-left: 150px;
   padding-right: 150px;
   max-width: calc(100% - 170px);
   background-color: var(--backgroundColorMain, #f3f5f7);
-  /* Задний фон контейнера */
 }
 
 .date-time-container {
   justify-content: center;
-  /* Центрируем плеер горизонтально */
   align-items: center;
-  /* Центрируем плеер вертикально */
   margin-left: 170px;
-  /* Учет ширины навигационной панели */
   padding-top: 20px;
   padding-bottom: 20px;
   padding-left: 150px;

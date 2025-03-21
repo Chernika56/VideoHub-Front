@@ -111,7 +111,6 @@ export default class Flussonic {
 
         const updatedStream = await this.#doRequest(url, params);
 
-        // Обновление URL для предварительного просмотра и видео (если они есть в ответе)
         if (updatedStream) {
             const token = updatedStream.playback_config.token;
             updatedStream.previewUrl = `${this.host}/${updatedStream.name}/preview.jpg?token=${token}`;

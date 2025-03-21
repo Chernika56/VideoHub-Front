@@ -14,7 +14,7 @@ export const useAuthStore = defineStore("auth", {
 
         if (data.value.session) {
           const token = useCookie("token", { sameSite: "lax" });
-          token.value = data.session; // Сохраняем токен
+          token.value = data.session; 
           this.authenticated = true;
         }
       } catch (error) {

@@ -18,7 +18,6 @@ const toggleFolder = () => {
 </script>
 
 <template>
-    <!-- Родительская папка -->
     <tr class="folder-row">
         <td :colspan="Object.keys(tableColumns).length" :style="{ paddingLeft: `${level * 20}px` }">
             <button @click="toggleFolder" class="arrow">
@@ -81,7 +80,6 @@ const toggleFolder = () => {
             </template>
         </tr>
 
-        <!-- Вложенные папки -->
         <template v-for="child in folder.children" :key="child.id">
             <FolderRow :folder="child" :level="level + 1" :tableColumns="tableColumns" />
         </template>

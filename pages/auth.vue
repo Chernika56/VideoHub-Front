@@ -22,7 +22,7 @@ const toggleMode = () => {
 
 const handleSubmit = async () => {
     if (isLogin.value) {
-        // Логика входа
+        // вход
         try {
             await authStore.authenticateUser(login.value, password.value)
 
@@ -36,7 +36,7 @@ const handleSubmit = async () => {
             alert('Ошибка входа.');
         }
     } else {
-        // Логика регистрации
+        // регистрация
         if (password.value !== confirmPassword.value) {
             alert('Пароли не совпадают!');
             return;

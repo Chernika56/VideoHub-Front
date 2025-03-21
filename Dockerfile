@@ -54,15 +54,17 @@ FROM node:20.15.1
 WORKDIR /app
 
 # Copy package.json and your lockfile, here we add pnpm-lock.yaml for illustration
-COPY . .
+COPY package.json . 
 
 # Install dependencies
 RUN npm install
 
+COPY . .
+
 # Build the project
 RUN npm run build
 
-ENV PORT 3000
+ENV PORT=3000
 
 CMD ["node", ".output/server/index.mjs"]
 

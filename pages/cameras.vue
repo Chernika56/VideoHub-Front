@@ -4,12 +4,12 @@ definePageMeta({
     title: 'Камеры',
 })
 
-const videos = ref([]); // Список видео
+const videos = ref([]);
 const organizations = ref([]);
 const folders = ref([]);
-const errorMessage = ref(''); // Сообщение об ошибке
-const maxRetries = 3; // Максимальное количество попыток
-let retryCount = 0; // Счетчик попыток
+const errorMessage = ref(''); 
+const maxRetries = 3;
+let retryCount = 0; 
 
 const dvr_depth_list = ref([
     // { title: 'Любой', value: '' },
@@ -64,7 +64,6 @@ const queryFilter = {
     sort: 'name',
 }
 
-// Функция для загрузки списка видео
 const fetchVideos = async () => {
     try {
         if (retryCount < maxRetries) {
@@ -77,7 +76,7 @@ const fetchVideos = async () => {
             if (!cameras.data.value) {
                 retryCount++;
                 console.warn(`Попытка ${retryCount}: Данные не загрузились, пробуем еще раз через 1 сек...`);
-                setTimeout(fetchVideos, 1000); // Повтор запроса через 1 сек
+                setTimeout(fetchVideos, 1000);
                 return;
             }
 
@@ -112,7 +111,7 @@ const fetchOrganizations = async () => {
             if (!organizationsData.data.value) {
                 retryCount++;
                 console.warn(`Попытка ${retryCount}: Данные не загрузились, пробуем еще раз через 1 сек...`);
-                setTimeout(fetchOrganizations, 1000); // Повтор запроса через 1 сек
+                setTimeout(fetchOrganizations, 1000);
                 return;
             }
 
@@ -147,7 +146,7 @@ const fetchFolders = async () => {
             if (!foldersData.data.value) {
                 retryCount++;
                 console.warn(`Попытка ${retryCount}: Данные не загрузились, пробуем еще раз через 1 сек...`);
-                setTimeout(fetchFolders, 1000); // Повтор запроса через 1 сек
+                setTimeout(fetchFolders, 1000); 
                 return;
             }
 
@@ -174,7 +173,6 @@ const buildFolderTree = (folders, videos, organizations) => {
     const folderMap = new Map();
     const folderTree = [];
 
-    // Копируем папки в Map без изменений
     folders.forEach(folder => {
         folderMap.set(folder.id, {
             ...folder,
@@ -185,7 +183,6 @@ const buildFolderTree = (folders, videos, organizations) => {
         });
     });
 
-    // Заполняем дерево
     folderMap.forEach((folder, id) => {
         if (folder.parent_id && folderMap.has(folder.parent_id)) {
             folderMap.get(folder.parent_id).children.push(folder);
@@ -196,13 +193,12 @@ const buildFolderTree = (folders, videos, organizations) => {
 
     const removeEmptyFolders = (folders) => {
         return folders.filter(folder => {
-            folder.children = removeEmptyFolders(folder.children); // 🔄 Очищаем пустые папки внутри
+            folder.children = removeEmptyFolders(folder.children); 
 
-            return folder.children.length > 0 || folder.cameras.length > 0; // ❌ Удаляем, если нет вложенных папок и камер
+            return folder.children.length > 0 || folder.cameras.length > 0; 
         });
     };
 
-    // ✅ Сортируем и удаляем пустые папки
     return removeEmptyFolders(folderTree)
         .sort((a, b) => a.organization_name.localeCompare(b.organization_name));
 };
