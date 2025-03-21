@@ -1,7 +1,7 @@
 export default class Flussonic {
     constructor(config) {
         this.host = config.host;
-        this.urlBase = config.host + '/vsaas/api/v2/';
+        this.urlBase = config.host + config.path; //'/vsaas/api/v2/'  '/streamer/api/v3/'
         this.login = config.username;
         this.password = config.password;
 
@@ -56,40 +56,50 @@ export default class Flussonic {
         return this.urlBase + parts.join('/');
     }
 
-    async getStreams(options = {}) {
+    async getAll(name, filter = {}) {
         const queryParams = new URLSearchParams();
 
-        for (const [key, value] of Object.entries(options)) {
-            if (value !== undefined && value !== null) {
+        for (const [key, value] of Object.entries(filter)) {
+            if (value !== undefined && value !== null && value !== '' && value !== 'false') {
                 queryParams.append(key, value);
             }
         }
 
-        const url = this.#getFullUrl('cameras') + (queryParams.toString() ? `?${queryParams.toString()}` : '');
-        const streams = await this.#doRequest(url);
-        streams.forEach(s => {
-            const token = s.playback_config.token;
-            s.previewUrl = `${this.host}/${s.name}/preview.jpg?token=${token}`;
-            s.videoUrl = `${this.host}/${s.name}/index.m3u8?token=${token}`;
-        });
-        return streams;
+        const url = this.#getFullUrl(name) + (queryParams.toString() ? `?${queryParams.toString()}` : '');
+
+        console.log(url)
+        const data = await this.#doRequest(url);
+
+        if (name === 'cameras') {
+            data.forEach(s => {
+                const token = s.playback_config.token;
+                s.previewUrl = `${this.host}/${s.name}/preview.jpg?token=${token}`;
+                s.videoUrl = `${this.host}/${s.name}/index.m3u8?token=${token}`;
+                // s.streamUrl = `${s.stream_url}?token=${token}`
+            });
+        }
+
+        // console.log(data)
+
+        return data;
     }
 
-    async getStreamById(streamId) {
-        const url = this.#getFullUrl('cameras', streamId);
+    async getStreamById(streamName) {
+        const url = this.#getFullUrl('cameras', streamName);
         const stream = await this.#doRequest(url);
 
         if (stream) {
             const token = stream.playback_config.token;
             stream.previewUrl = `${this.host}/${stream.name}/preview.jpg?token=${token}`;
             stream.videoUrl = `${this.host}/${stream.name}/index.m3u8?token=${token}`;
+            // stream.streamUrl = `${stream.stream_url}?token=${token}`
         }
 
         return stream;
     }
 
-    async updateStreamById(streamId, updateData) {
-        const url = this.#getFullUrl('cameras', streamId);
+    async updateStreamById(streamName, updateData) {
+        const url = this.#getFullUrl('cameras', streamName);
 
         const params = {
             method: 'PUT',
@@ -101,7 +111,6 @@ export default class Flussonic {
 
         const updatedStream = await this.#doRequest(url, params);
 
-        // Обновление URL для предварительного просмотра и видео (если они есть в ответе)
         if (updatedStream) {
             const token = updatedStream.playback_config.token;
             updatedStream.previewUrl = `${this.host}/${updatedStream.name}/preview.jpg?token=${token}`;
@@ -111,8 +120,8 @@ export default class Flussonic {
         return updatedStream;
     }
 
-    async deleteStreamById(streamId) {
-        const url = this.#getFullUrl('cameras', streamId)
+    async deleteStreamById(streamName) {
+        const url = this.#getFullUrl('cameras', streamName)
 
         const params = {
             method: 'DELETE',
@@ -124,22 +133,6 @@ export default class Flussonic {
         const response = await this.#doRequest(url, params)
 
         return response;
-    }
-
-    async addStream(newData) {
-        const url = this.#getFullUrl('cameras')
-
-        const params = {
-            method: 'POST',
-            body: JSON.stringify(newData),
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        }
-
-        const newStream = await this.#doRequest(url, params)
-
-        return newStream
     }
 
     async getProfileInfo() {

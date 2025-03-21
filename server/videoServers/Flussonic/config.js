@@ -1,7 +1,7 @@
-import * as path from "node:path";
+import { resolve } from 'path';
 import * as fs from "node:fs/promises";
 
-const filePath = "D:\\Diplom\\FrontEnd-Nuxt\\config.json"
+const filePath = resolve(process.cwd(), 'config.json');
 
 export default async function getConfig() {
   try {
@@ -10,10 +10,18 @@ export default async function getConfig() {
   } catch (ex) {
     console.log("getConfig:", ex);
     const config = {
-      videoServer: {
+      videoServer1netby: {
         host: "https://camdvr1.1net.by",
+        path: "/vsaas/api/v2/s",
         port: "1337",
         username: "admin",
+        password: "321678qw",
+      },
+      videoServerTest: {
+        host: "172.16.0.48",
+        path: "/streamer/api/v3/",
+        port: "80",
+        username: "fluss",
         password: "321678qw",
       },
       login: { password: "admin" },

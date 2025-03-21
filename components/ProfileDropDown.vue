@@ -57,11 +57,8 @@ const logout = () => {
 <style>
 .dropdown {
     position: absolute;
-    /* Фиксированное позиционирование относительно окна */
     top: 41px;
-    /* Отступ от верхнего края окна */
     right: 10px;
-    /* Отступ от правого края окна */
     max-height: 702px;
     background-color: white;
     border-radius: 4px;
