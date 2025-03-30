@@ -1,6 +1,4 @@
 <script setup>
-let language = "RU"
-let person = "Admin"
 </script>
 
 <template>
@@ -9,7 +7,7 @@ let person = "Admin"
             <img alt="Vue logo" class="logoImg" src="@/assets/logo.svg" />
         </nuxt-link>
         <MainColumn />
-        <RightColumn :language=language :person=person />
+        <RightColumn />
     </header>
 </template>
 

@@ -3,6 +3,7 @@ const props = defineProps({
     folder: Object,
     level: Number,
     tableColumns: Object,
+    streamers: Object,
 });
 
 const isOpen = ref(props.folder.isOpen);
@@ -24,7 +25,7 @@ const toggleFolder = () => {
                 {{ isOpen ? '▼' : '▶' }}
             </button>
             <template v-if="level == 0">
-                📂 {{ folder.organization_name }}
+                📂 {{ folder.organizationName }}
             </template>
             <template v-else>
                 📂 {{ folder.title }}
@@ -38,31 +39,32 @@ const toggleFolder = () => {
 
                 <td v-if="column.visible && key === 'name'" :class="key"
                     :style="{ paddingLeft: `${(level + 1) * 20}px` }">
-                    <span :class="['status-dot', getStatusClass(video.stream_status.alive)]"></span>
+                    <span :class="['status-dot', getStatusClass(video.enabled)]"></span>
+                    <!-- <span :class="['status-dot', getStatusClass(video.streamStatus.alive)]"></span> -->
                     <nuxt-link :to="`/VideoPlayer/${video.name}`">
                         {{ video.title }}
                     </nuxt-link>
                 </td>
 
-                <td v-else-if="column.visible && key === 'streamUrl'" :class="key" :title="video.stream_url">
-                    {{ video.stream_url }}
+                <td v-else-if="column.visible && key === 'streamUrl'" :class="key" :title="video.streamUrl">
+                    {{ video.streamUrl }}
                 </td>
 
                 <td v-else-if="column.visible && key === 'subStreamUrl'" :class="key"
-                    :title="video.subкуьщеуstream_url">
-                    {{ video.substream_url }}
+                    :title="video.subStreamUrl">
+                    {{ video.subStreamUrl }}
                 </td>
 
                 <td v-else-if="column.visible && key === 'preset'" :class="key">
                     {{ video.preset.title }}
                 </td>
 
-                <td v-else-if="column.visible && key === 'dvr_depth'" :class="key">
-                    {{ video.dvr_depth == 1 ? "1 day" : video.dvr_depth ? `${video.dvr_depth} days` : '' }}
+                <td v-else-if="column.visible && key === 'dvrDepth'" :class="key">
+                    {{ video.dvrDepth == 1 ? "1 day" : video.dvrDepth ? `${video.dvrDepth} days` : '' }}
                 </td>
 
                 <td v-else-if="column.visible && key === 'ipAddress'" :class="key">
-                    {{ video.stream_url.match(regex)?.[1] }}
+                    {{ video.streamUrl.match(regex)?.[1] }}
                 </td>
 
                 <td v-else-if="column.visible && key === 'dvrLimit'" :class="key">
@@ -70,12 +72,12 @@ const toggleFolder = () => {
                 </td>
 
                 <td v-else-if="column.visible && key === 'streamer'" :class="key">
-                    {{ video.stream_status.server }}
+                    {{ streamers[0].hostName }}
 
                 </td>
 
                 <td v-else-if="column.visible && key === 'dvrSpace'" :class="key">
-                    {{ video.dvr_space }}
+                    {{ video.dvrSpace }}
                 </td>
             </template>
         </tr>

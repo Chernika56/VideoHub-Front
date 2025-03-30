@@ -50,21 +50,15 @@
 
 # Build Stage 1
 
-FROM node:20.15.1
+FROM node:20.15.1 AS build
 WORKDIR /app
-
-# Copy package.json and your lockfile, here we add pnpm-lock.yaml for illustration
 COPY package.json . 
-
-# Install dependencies
 RUN npm install
-
 COPY . .
-
-# Build the project
 RUN npm run build
 
-ENV PORT=3000
-
-CMD ["node", ".output/server/index.mjs"]
+FROM nginx:stable-alpine
+COPY --from=build /app/.output /usr/share/nginx/html
+CMD ["nginx", "-g", "daemon off;"]
+# CMD ["node", ".output/server/index.mjs"]
 

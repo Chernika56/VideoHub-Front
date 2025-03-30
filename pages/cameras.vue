@@ -7,11 +7,12 @@ definePageMeta({
 const videos = ref([]);
 const organizations = ref([]);
 const folders = ref([]);
-const errorMessage = ref(''); 
-const maxRetries = 3;
-let retryCount = 0; 
+const streamers = ref([]);
+const errorMessage = ref('');
+const maxRetries = 5;
+let retryCount = 0;
 
-const dvr_depth_list = ref([
+const dvrDepthList = ref([
     // { title: 'Любой', value: '' },
     // { title: 'По движению', value: '0.125' },
     { title: '1 день', value: '1' },
@@ -33,13 +34,13 @@ const dvr_depth_list = ref([
 
 const filter = ref({
     search: '',
-    dvr_depth: '',
+    dvrDepth: '',
     streamer: '',
-    organization_id: '',
-    dvr_enabled: false,
+    organizationId: '',
+    dvrEnabled: false,
     agent: false,
     onvif: false,
-    vision_enabled: false,
+    visionEnabled: false,
     enabled: false,
     limit: 1000,
 });
@@ -47,13 +48,13 @@ const filter = ref({
 const resetFilters = () => {
     filter.value = {
         search: '',
-        dvr_depth: '',
+        dvrDepth: '',
         streamer: '',
-        organization_id: '',
-        dvr_enabled: false,
+        organizationId: '',
+        dvrEnabled: false,
         agent: false,
         onvif: false,
-        vision_enabled: false,
+        visionEnabled: false,
         enabled: false,
         limit: 1000,
     };
@@ -64,23 +65,26 @@ const queryFilter = {
     sort: 'name',
 }
 
-const fetchVideos = async () => {
+const apiUrl = useRuntimeConfig().public.apiBaseUrl ?? 'http://localhost:5201'
+
+const fetchStreamers = async () => {
     try {
         if (retryCount < maxRetries) {
-            const cameras = await useFetch('/api/cameras', {
-                method: 'GET',
-                query: { ...filter.value },
+            const { data, error, status } = await useFetch(`${apiUrl}/api/v1.0/streamers`, {
+                method: "GET",
+                credentials: 'include',
             });
-            console.log(`Попытка ${retryCount + 1} (камеры):`, cameras.data.value);
 
-            if (!cameras.data.value) {
+            console.log(`Попытка ${retryCount + 1} (стримеры):`, data.value);
+
+            if (!data.value) {
                 retryCount++;
                 console.warn(`Попытка ${retryCount}: Данные не загрузились, пробуем еще раз через 1 сек...`);
                 setTimeout(fetchVideos, 1000);
                 return;
             }
 
-            videos.value = cameras.data.value
+            streamers.value = data.value
             retryCount = 0
         } else {
             errorMessage.value = 'Превышено число попыток'
@@ -88,12 +92,43 @@ const fetchVideos = async () => {
         }
 
     } catch (error) {
-        // if (error.response.status === 401) {
-        //     alert('Неавторизован. Выход из аккаунта.');
-        //     authState.logout();
-        //     router.push('/auth');
-        // }
+        errorMessage.value = 'Ошибка загрузки стримеров';
+        console.error('Ошибка загрузки стримеров:', error);
+    }
+}
 
+const fetchVideos = async () => {
+    try {
+        if (retryCount < maxRetries) {
+            const { data, error, status } = await useFetch(`${apiUrl}/api/v1.0/cameras`, {
+                method: "GET",
+                credentials: 'include',
+            });
+
+            console.log(`Попытка ${retryCount + 1} (камеры):`, data.value);
+
+            if (!data.value) {
+                retryCount++;
+                console.warn(`Попытка ${retryCount}: Данные не загрузились, пробуем еще раз через 1 сек...`);
+                setTimeout(fetchVideos, 1000);
+                return;
+            }
+
+            data.value.forEach(s => {
+                const token = s.playbackConfig.token;
+                s.previewUrl = `${streamers.value[0].apiUrl}/${s.name}/preview.jpg?token=${token}`;
+                s.videoUrl = `${streamers.value[0].apiUrl}/${s.name}/index.m3u8?token=${token}`;
+                //s.streamUrl = `${s.stream_url}?token=${token}`
+            });
+
+            videos.value = data.value
+            retryCount = 0
+        } else {
+            errorMessage.value = 'Превышено число попыток'
+            console.error(errorMessage.value)
+        }
+
+    } catch (error) {
         errorMessage.value = 'Ошибка загрузки видео';
         console.error('Ошибка загрузки видео:', error);
     }
@@ -102,20 +137,21 @@ const fetchVideos = async () => {
 const fetchOrganizations = async () => {
     try {
         if (retryCount < maxRetries) {
-            const organizationsData = await useFetch('/api/organizations', {
-                method: 'GET',
-                query: { ...queryFilter },
+            const { data, error, status } = await useFetch(`${apiUrl}/api/v1.0/organizations`, {
+                method: "GET",
+                credentials: 'include',
             });
-            console.log(`Попытка ${retryCount + 1} (организации):`, organizationsData.data.value)
 
-            if (!organizationsData.data.value) {
+            console.log(`Попытка ${retryCount + 1} (организации):`, data.value)
+
+            if (!data.value) {
                 retryCount++;
                 console.warn(`Попытка ${retryCount}: Данные не загрузились, пробуем еще раз через 1 сек...`);
                 setTimeout(fetchOrganizations, 1000);
                 return;
             }
 
-            organizations.value = organizationsData.data.value
+            organizations.value = data.value
             retryCount = 0
         } else {
             errorMessage.value = 'Превышено число попыток'
@@ -123,12 +159,6 @@ const fetchOrganizations = async () => {
         }
 
     } catch (error) {
-        // if (error.response.status === 401) {
-        //     alert('Неавторизован. Выход из аккаунта.');
-        //     authState.logout();
-        //     router.push('/auth');
-        // }
-
         errorMessage.value = 'Ошибка загрузки организаций';
         console.error('Ошибка загрузки организаций:', error);
     }
@@ -137,20 +167,21 @@ const fetchOrganizations = async () => {
 const fetchFolders = async () => {
     try {
         if (retryCount < maxRetries) {
-            const foldersData = await useFetch('/api/folders', {
-                method: 'GET',
-                query: { ...queryFilter },
+            const { data, error, status } = await useFetch(`${apiUrl}/api/v1.0/folders`, {
+                method: "GET",
+                credentials: 'include',
             });
-            console.log(`Попытка ${retryCount + 1} (папки):`, foldersData.data.value);
 
-            if (!foldersData.data.value) {
+            console.log(`Попытка ${retryCount + 1} (папки):`, data.value);
+
+            if (!data.value) {
                 retryCount++;
                 console.warn(`Попытка ${retryCount}: Данные не загрузились, пробуем еще раз через 1 сек...`);
-                setTimeout(fetchFolders, 1000); 
+                setTimeout(fetchFolders, 1000);
                 return;
             }
 
-            folders.value = foldersData.data.value
+            folders.value = data.value
             retryCount = 0
         } else {
             errorMessage.value = 'Превышено число попыток'
@@ -158,12 +189,6 @@ const fetchFolders = async () => {
         }
 
     } catch (error) {
-        // if (error.response.status === 401) {
-        //     alert('Неавторизован. Выход из аккаунта.');
-        //     authState.logout();
-        //     router.push('/auth');
-        // }
-
         errorMessage.value = 'Ошибка загрузки папок';
         console.error('Ошибка загрузки папок:', error);
     }
@@ -176,16 +201,16 @@ const buildFolderTree = (folders, videos, organizations) => {
     folders.forEach(folder => {
         folderMap.set(folder.id, {
             ...folder,
-            organization_name: organizations.find(org => org.id === folder.organization_id)?.title || 'Undefined',
-            cameras: videos.filter(video => video.folder_id === folder.id),
+            organizationName: organizations.find(org => org.id === folder.organizationId)?.title || 'Undefined',
+            cameras: videos.filter(video => video.folderId === folder.id),
             children: [],
             isOpen: true,
         });
     });
 
     folderMap.forEach((folder, id) => {
-        if (folder.parent_id && folderMap.has(folder.parent_id)) {
-            folderMap.get(folder.parent_id).children.push(folder);
+        if (folder.parentId && folderMap.has(folder.parentId)) {
+            folderMap.get(folder.parentId).children.push(folder);
         } else {
             folderTree.push(folder);
         }
@@ -193,20 +218,21 @@ const buildFolderTree = (folders, videos, organizations) => {
 
     const removeEmptyFolders = (folders) => {
         return folders.filter(folder => {
-            folder.children = removeEmptyFolders(folder.children); 
+            folder.children = removeEmptyFolders(folder.children);
 
-            return folder.children.length > 0 || folder.cameras.length > 0; 
+            return folder.children.length > 0 || folder.cameras.length > 0;
         });
     };
 
     return removeEmptyFolders(folderTree)
-        .sort((a, b) => a.organization_name.localeCompare(b.organization_name));
+        .sort((a, b) => a.organizationName.localeCompare(b.organizationName));
 };
 
 
 const folderTree = computed(() => buildFolderTree(folders.value, videos.value, organizations.value));
 
 onMounted(async () => {
+    await fetchStreamers();
     await fetchVideos();
     await fetchOrganizations();
     await fetchFolders();
@@ -258,7 +284,7 @@ const tableColumns = ref({
     ipAddress: { label: "IP-адрес", custom: true, visible: true },
     streamer: { label: "Стример", custom: true, visible: true },
     preset: { label: "Пресет", custom: true, visible: true },
-    dvr_depth: { label: "Архив", custom: true, visible: true },
+    dvrDepth: { label: "Архив", custom: true, visible: true },
     dvrLimit: { label: "Лимит DVR (дни)", custom: true, visible: false },
     dvrSpace: { label: "Пространство DVR", custom: true, visible: false },
 });
@@ -271,12 +297,16 @@ const resetColumns = () => {
     tableColumns.value['streamUrl'].visible = false;
     tableColumns.value['subStreamUrl'].visible = false;
     tableColumns.value['preset'].visible = true;
-    tableColumns.value['dvr_depth'].visible = true;
+    tableColumns.value['dvrDepth'].visible = true;
     tableColumns.value['ipAddress'].visible = true;
     tableColumns.value['dvrLimit'].visible = false;
     tableColumns.value['streamer'].visible = true;
     tableColumns.value['dvrSpace'].visible = false;
 };
+
+const addCamera = () => {
+    navigateTo('/addCamera')
+}
 
 </script>
 
@@ -286,6 +316,7 @@ const resetColumns = () => {
             <h2 v-if="videos == null">Загрузка...</h2>
             <!-- <h2 v-if="errorMessage" class="error">{{ errorMessage }}</h2> -->
             <div class="buttons">
+                <button class="button" @click="addCamera">Добавить камеру</button>
                 <button class="button" @click="toggleColumnsMenu">📊 Столбцы</button>
                 <div v-if="showColumnsMenu" class="dropdown-menu" ref="columnsMenu">
                     <div class="columns-container">
@@ -302,14 +333,14 @@ const resetColumns = () => {
                 <button class="button" @click="toggleFilterMenu">🔍 Фильтр</button>
                 <div v-if="showFilterMenu" class="dropdown-menu" ref="filterMenu">
                     <input class="input-field" type="text" placeholder="🔍 Поиск..." v-model="filter.search">
-                    <select v-model="filter.dvr_depth" class="input-field">
+                    <select v-model="filter.dvrDepth" class="input-field">
                         <option value="">Глубина DVR</option>
-                        <option v-for="dvr_depth in dvr_depth_list" :key="dvr_depth.value" :value="dvr_depth.value">
-                            {{ dvr_depth.title }}
+                        <option v-for="dvrDepth in dvrDepthList" :key="dvrDepth.value" :value="dvrDepth.value">
+                            {{ dvrDepth.title }}
                         </option>
                     </select>
                     <input class="input-field" type="text" placeholder="Стример" v-model="filter.streamer">
-                    <select v-model="filter.organization_id" class="input-field">
+                    <select v-model="filter.organizationId" class="input-field">
                         <option value="">Выберите организацию</option>
                         <option v-for="org in organizations" :key="org.id" :value="org.id">
                             {{ org.title }}
@@ -317,10 +348,10 @@ const resetColumns = () => {
                     </select>
 
                     <div class="checkbox-group">
-                        <label><input type="checkbox" v-model="filter.dvr_enabled"> Архив</label>
+                        <label><input type="checkbox" v-model="filter.dvrEnabled"> Архив</label>
                         <label><input type="checkbox" v-model="filter.agent"> Agent</label>
                         <label><input type="checkbox" v-model="filter.onvif"> ONVIF</label>
-                        <label><input type="checkbox" v-model="filter.vision_enabled"> ANPR</label>
+                        <label><input type="checkbox" v-model="filter.visionEnabled"> ANPR</label>
                         <label><input type="checkbox" v-model="filter.enabled"> Включена</label>
                     </div>
                     <button class="reset-button" @click="resetFilters">🧹 Очистить фильтры</button>
@@ -340,7 +371,7 @@ const resetColumns = () => {
             </thead>
             <tbody>
                 <template v-for="folder in folderTree" :key="folder.id">
-                    <FolderRow :folder="folder" :level="0" :tableColumns="tableColumns" />
+                    <FolderRow :folder="folder" :level="0" :tableColumns="tableColumns" :streamers="streamers" />
                 </template>
 
             </tbody>

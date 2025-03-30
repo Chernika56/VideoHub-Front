@@ -18,15 +18,11 @@ const route = useRoute()
 <style scoped>
 div {
   left: 170px;
-  position: fixed;
   top: 42px;
-  bottom: 0;
-  right: 0;
   overflow: auto;
   overflow-x: hidden;
   padding: 20px;
   position: relative;
-  min-height: 100%;
   background-color: var(--backgroundColorMain, #f3f5f7);
 }
 </style>

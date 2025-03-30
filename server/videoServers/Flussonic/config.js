@@ -12,7 +12,7 @@ export default async function getConfig() {
     const config = {
       videoServer1netby: {
         host: "https://camdvr1.1net.by",
-        path: "/vsaas/api/v2/s",
+        path: "/vsaas/api/v2/",
         port: "1337",
         username: "admin",
         password: "321678qw",

@@ -1,4 +1,5 @@
 <script setup>
+import { useAsyncData } from '#app';
 
 definePageMeta({
     title: 'Авторизация',
@@ -7,61 +8,37 @@ definePageMeta({
 
 const authStore = useAuthStore();
 
+onMounted(async () => {
+  await authStore.whoami();
+  console.log("whoami выполнен");
+});
+
+if (authStore.authenticated) {
+    navigateTo('/')
+}
+
 const isLogin = ref(true);
 const login = ref('');
 const password = ref('');
 const confirmPassword = ref('');
 const router = useRouter();
 
-const toggleMode = () => {
-    isLogin.value = !isLogin.value;
-    login.value = '';
-    password.value = '';
-    confirmPassword.value = '';
+const forgotPassword = () => {
+    // забыли пароль
 };
 
 const handleSubmit = async () => {
-    if (isLogin.value) {
-        // вход
-        try {
-            await authStore.authenticateUser(login.value, password.value)
+    try {
+        await authStore.authenticateUser(login.value, password.value)
 
-            if (authStore.authenticated) {
-                navigateTo('/')
-            } else {
-                alert('Ошибка входа: Проверьте логин и пароль.');
-            }
-            
-        } catch (error) {
-            alert('Ошибка входа.');
-        }
-    } else {
-        // регистрация
-        if (password.value !== confirmPassword.value) {
-            alert('Пароли не совпадают!');
-            return;
+        if (authStore.authenticated) {
+            navigateTo('/')
+        } else {
+            alert('Ошибка входа: Проверьте логин и пароль.');
         }
 
-        try {
-            // const response = await axios.post('https://localhost:7277/api/v1.0/user/registration', { 
-            //     login: login.value, 
-            //     password: password.value 
-            // }, { withCredentials: true })
-
-            const response = await axiosApi.post('/user/registration', {
-                login: login.value,
-                password: password.value
-            })
-
-            if (response.status === 200) {
-                authState.login();
-                router.push('/');
-            } else {
-                alert('Ошибка регистрации: Возможно, пользователь уже существует.');
-            }
-        } catch (error) {
-            alert('Ошибка регистрации: Проверьте данные.');
-        }
+    } catch (error) {
+        alert('Ошибка входа.');
     }
 };
 </script>
@@ -69,7 +46,7 @@ const handleSubmit = async () => {
 <template>
     <div class="root">
         <form @submit.prevent="handleSubmit" class="form">
-            <h2>{{ isLogin ? 'Вход' : 'Регистрация' }}</h2>
+            <h2>Вход</h2>
             <div class="formField">
                 <span for="login">Логин</span>
                 <input id="login" v-model="login" required />
@@ -78,19 +55,14 @@ const handleSubmit = async () => {
                 <span for="password">Пароль</span>
                 <input id="password" type="password" v-model="password" required />
             </div>
-            <div v-if="!isLogin" class="formField">
-                <span for="confirmPassword">Подтвердите пароль</span>
-                <input id="confirmPassword" type="password" v-model="confirmPassword" required />
-            </div>
             <div class="formField submitButton">
-                <button class="buttonSubmit" type="submit">{{ isLogin ? 'Войти' : 'Зарегистрироваться' }}</button>
+                <button class="buttonSubmit" type="submit">Войти</button>
             </div>
-            <div class="footer">
-                <p>{{ isLogin ? 'Нет аккаунта?' : 'Уже есть аккаунт?' }}</p>
-                <button @click="toggleMode" class="link">
-                    {{ isLogin ? 'Регистрация' : 'Вход' }}
+            <!-- <div class="footer">
+                <button @click="forgotPassword" class="link">
+                    Забыли пароль
                 </button>
-            </div>
+            </div> -->
         </form>
     </div>
 </template>

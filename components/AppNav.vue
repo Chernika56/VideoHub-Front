@@ -6,17 +6,17 @@ defineProps({
     type: Array,
     required: true
   },
-  collectionSettings: {
-    type: Array,
-    required: true
-  }
+  // collectionSettings: {
+  //   type: Array,
+  //   required: true
+  // }
 })
 </script>
 
 <template>
   <nav>
     <AppNavList :list="collectionNav" style="flex: 1 1 auto" />
-    <AppNavList :list="collectionSettings" />
+    <!-- <AppNavList :list="collectionSettings" /> -->
   </nav>
 </template>
 
