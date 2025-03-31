@@ -1,7 +1,12 @@
 <template>
-    <NuxtLayout>
-      <NuxtLoadingIndicator />
+  <NuxtLayout>
+    <NuxtLoadingIndicator />
 
-      <NuxtPage />
-    </NuxtLayout>
+    <NuxtPage />
+  </NuxtLayout>
 </template>
+
+<script setup>
+const authStore = useAuthStore();
+await authStore.whoami();
+</script>

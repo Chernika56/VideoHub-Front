@@ -17,6 +17,6 @@
     "vue-datepicker-next": "^1.0.3",
     "vue-router": "latest",
     "vue-video-player": "^6.0.0",
-    "vuetify": "^3.7.11"
+    "vuetify": "^3.7.18"
   }
 }

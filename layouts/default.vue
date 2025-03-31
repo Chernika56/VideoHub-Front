@@ -1,37 +1,64 @@
+<script setup>
+
+const authStore = useAuthStore();
+
+await authStore.whoami();
+
+if (!authStore.authenticated) {
+    navigateTo('/auth')
+}
+
+const collectionNav = ref([])
+
+if (authStore.accessLevel === "User") {
+    collectionNav.value = [
+        { title: 'cameras', text: 'Камеры' },
+        //{ title: 'images', text: 'Изображение' },
+        { title: 'favorites', text: 'Избранные' },
+        { title: 'mosaics', text: 'Мозаики' },
+        { title: 'map', text: 'Карта' },
+        { title: 'events', text: 'События' },
+    ]
+} else if (authStore.accessLevel === "Admin") {
+    collectionNav.value = [
+        { title: 'cameras', text: 'Камеры' },
+        //{ title: 'images', text: 'Изображение' },
+        { title: 'favorites', text: 'Избранные' },
+        { title: 'mosaics', text: 'Мозаики' },
+        { title: 'map', text: 'Карта' },
+        { title: 'events', text: 'События' },
+        { title: 'users', text: 'Пользователи' },
+        { title: 'organizations', text: 'Организации' },
+        { title: 'presets', text: 'Пресеты камер' },
+    ]
+}
+
+// const collectionSettings = [
+//     { title: 'settings', text: 'Настройки' },
+//     { title: 'reports', text: 'Состояние' },
+//     { title: 'assignment', text: 'Журнал доступа' }
+// ]
+
+// const collectionFooter = [
+//     { title: 'Powered by', text: 'Ya' },
+//     { title: 'Версия:', text: '0.1' },
+//     { title: '0.1', text: 'Адрес' },
+//     { title: 'phone', text: '123456789' },
+//     { title: 'access_time', text: '9:00-18:00' }
+// ]
+
+</script>
+
 <template>
     <v-app>
         <AppHeader />
-        <AppNav :collection-nav="collectionNav" :collection-settings="collectionSettings" />
+        <!-- <AppNav :collection-nav="collectionNav" :collection-settings="collectionSettings" /> -->
+        <AppNav :collection-nav="collectionNav" />
         <main>
             <slot></slot>
         </main>
     </v-app>
 </template>
-
-<script setup>
-
-const collectionNav = [
-    { title: 'cameras', text: 'Камеры' },
-    { title: 'images', text: 'Изображение' },
-    { title: 'mosaics', text: 'Мозайки' },
-    { title: 'map', text: 'Карта' }
-]
-
-const collectionSettings = [
-    { title: 'settings', text: 'Настройки' },
-    { title: 'reports', text: 'Состояние' },
-    { title: 'assignment', text: 'Журнал доступа' }
-]
-
-const collectionFooter = [
-    { title: 'Powered by', text: 'Ya' },
-    { title: 'Версия:', text: '0.1' },
-    { title: '0.1', text: 'Адрес' },
-    { title: 'phone', text: '123456789' },
-    { title: 'access_time', text: '9:00-18:00' }
-]
-
-</script>
 
 <style scoped>
 main {
@@ -47,7 +74,7 @@ main {
     min-height: 100%;
     background-color: var(--backgroundColorMain, #f3f5f7);
     width: calc(100% - 50px);
-    
+
     /* left: 50px;
     position: fixed;
     top: 42px;
