@@ -174,24 +174,23 @@ const fetchVideoUrl = async () => {
 
         stream.value = data.value;
 
-        var apiUrl = await getStreamerApiUrl(stream.value.streamerId);
-        console.log(apiUrl)
+        var streamerUrl = await getStreamerApiUrl(stream.value.streamerId);
 
         const token = stream.value.playbackConfig.token;
-        stream.value.previewUrl = `${apiUrl}/${stream.value.name}/preview.jpg?token=${token}`;
-        stream.value.videoUrl = `${apiUrl}/${stream.value.name}/index.m3u8?token=${token}`;
+        stream.value.previewUrl = `${streamerUrl}/${stream.value.name}/preview.jpg?token=${token}`;
+        stream.value.videoUrl = `${streamerUrl}/${stream.value.name}/index.m3u8?token=${token}`;
         //s.streamUrl = `${s.stream_url}?token=${token}`
 
         retryCount = 0;
 
-        const startDate = timeRange.value[0]
-        const endDate = timeRange.value[1]
+        // const startDate = timeRange.value[0]
+        // const endDate = timeRange.value[1]
 
-        const startTime = Math.round(startDate.getTime() / 1000);
-        const durationInSeconds = Math.round(endDate - startDate) / 1000;
-        const index = `index-${startTime}-${durationInSeconds}.m3u8`;
-        videoUrl.value = stream.value.videoUrl.replace('index.m3u8', index);
-        //videoUrl.value = stream.value.videoUrl.replace('index.m3u8', 'shoutcast');
+        // const startTime = Math.round(startDate.getTime() / 1000);
+        // const durationInSeconds = Math.round(endDate - startDate) / 1000;
+        // const index = `index-${startTime}-${durationInSeconds}.m3u8`;
+        // videoUrl.value = stream.value.videoUrl.replace('index.m3u8', index);
+        videoUrl.value = stream.value.videoUrl;
         //videoUrl.value = "http://172.16.0.48/test/embed.html"
         //videoUrl.value = "http://172.16.0.48/demo/mpegts/index.m3u8"
 

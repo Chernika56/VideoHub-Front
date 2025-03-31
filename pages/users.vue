@@ -9,10 +9,12 @@ const maxRetries = 3;
 let retryCount = 0;
 const errorMessage = ref({});
 
+const apiUrl = useRuntimeConfig().public.apiBaseUrl ?? 'http://localhost:5201'
+
 const fetchOrganizations = async () => {
     try {
         if (retryCount < maxRetries) {
-            const { data } = await useFetch('https://localhost:7277/api/v1.0/organizations', {
+            const { data } = await useFetch(`${apiUrl}/api/v1.0/organizations`, {
                 method: "GET",
                 credentials: 'include',
             });
@@ -42,7 +44,7 @@ const fetchOrganizations = async () => {
 const fetchUsers = async () => {
     try {
         if (retryCount < maxRetries) {
-            const { data } = await useFetch('https://localhost:7277/api/v1.0/users', {
+            const { data } = await useFetch(`${apiUrl}/api/v1.0/users`, {
                 method: "GET",
                 credentials: 'include',
             });
