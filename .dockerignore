@@ -1,8 +1,8 @@
 # Игнорируем все файлы node_modules
 node_modules
-
 .nuxt
 .output
+dist
 
 # Игнорируем папки и файлы для тестов
 test
