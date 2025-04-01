@@ -12,8 +12,8 @@ export const useAuthStore = defineStore("auth", {
   actions: {
     async authenticateUser(login, password) {
       try {
-        const apiUrl = useRuntimeConfig().public.apiBaseUrl ?? 'http://localhost:5201'
-        const { data, error, status } = await useFetch(apiUrl + '/api/v1.0/auth/login', {
+        const apiUrl = useRuntimeConfig().public.API_BASE_URL
+        const { data, error, status } = await useFetch(`${apiUrl}/api/v1.0/auth/login`, {
           method: "POST",
           body: { login: login, password: password },
           credentials: "include",
@@ -29,8 +29,8 @@ export const useAuthStore = defineStore("auth", {
 
     async whoami() {
       try {
-        const apiUrl = useRuntimeConfig().public.apiBaseUrl ?? 'http://localhost:5201'
-        const { data, error, status } = await useFetch(apiUrl + '/api/v1.0/auth/whoami', {
+        const apiUrl = useRuntimeConfig().public.API_BASE_URL
+        const { data, error, status } = await useFetch(`${apiUrl}/api/v1.0/auth/whoami`, {
           method: "GET",
           credentials: "include",
         });
@@ -49,8 +49,8 @@ export const useAuthStore = defineStore("auth", {
     },
 
     async logUserOut() {
-      const apiUrl = useRuntimeConfig().public.apiBaseUrl ?? 'http://localhost:5201'
-      const { data, error, status } = await useFetch(apiUrl + '/api/v1.0/auth/logout', {
+      const apiUrl = useRuntimeConfig().public.API_BASE_URL
+      const { data, error, status } = await useFetch(`${apiUrl}/api/v1.0/auth/logout`, {
         method: "POST",
         credentials: "include",
       });

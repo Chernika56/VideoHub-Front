@@ -11,4 +11,9 @@ export default defineNuxtConfig({
   build: {
     transpile: ["vuetify"],
   },
+  runtimeConfig: {
+    public: {
+      API_BASE_URL: process.env.API_BASE_URL || 'http://localhost:5201'
+    }
+  }
 })

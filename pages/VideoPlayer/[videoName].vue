@@ -24,7 +24,7 @@ let retryCount = 0;
 
 const disabled = ref(false);
 
-const apiUrl = useRuntimeConfig().public.apiBaseUrl ?? 'http://localhost:5201'
+const apiUrl = useRuntimeConfig().public.API_BASE_URL
 
 const fetchStreamers = async () => {
     try {
