@@ -41,7 +41,7 @@ const presets = ref([]);
 const folders = ref([]);
 const errorMessage = ref();
 
-const apiUrl = useRuntimeConfig().public.apiBaseUrl ?? 'http://localhost:5201'
+const apiUrl = useRuntimeConfig().public.API_BASE_URL
 
 const fetchStreamers = async () => {
 	try {

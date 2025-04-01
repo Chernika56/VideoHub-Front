@@ -18,5 +18,8 @@
     "vue-router": "latest",
     "vue-video-player": "^6.0.0",
     "vuetify": "^3.7.18"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.16"
   }
 }

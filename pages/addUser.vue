@@ -1,5 +1,5 @@
 <script setup>
-const apiUrl = useRuntimeConfig().public.apiBaseUrl ?? 'http://localhost:5201'
+const apiUrl = useRuntimeConfig().public.API_BASE_URL
 </script>
 
 <template>
