@@ -6,13 +6,12 @@ export const useAuthStore = defineStore("auth", {
     accessLevel: null,
     id: null,
     login: null,
-
   }),
   //https://localhost:7277
   actions: {
     async authenticateUser(login, password) {
       try {
-        const apiUrl = useRuntimeConfig().public.API_BASE_URL
+        const apiUrl = useRuntimeConfig().public.API_BASE_URL ?? window.location.origin
         const { data, error, status } = await useFetch(`${apiUrl}/api/v1.0/auth/login`, {
           method: "POST",
           body: { login: login, password: password },
@@ -29,7 +28,7 @@ export const useAuthStore = defineStore("auth", {
 
     async whoami() {
       try {
-        const apiUrl = useRuntimeConfig().public.API_BASE_URL
+        const apiUrl = useRuntimeConfig().public.API_BASE_URL ?? window.location.origin
         const { data, error, status } = await useFetch(`${apiUrl}/api/v1.0/auth/whoami`, {
           method: "GET",
           credentials: "include",
@@ -49,7 +48,7 @@ export const useAuthStore = defineStore("auth", {
     },
 
     async logUserOut() {
-      const apiUrl = useRuntimeConfig().public.API_BASE_URL
+      const apiUrl = useRuntimeConfig().public.API_BASE_URL ?? window.location.origin
       const { data, error, status } = await useFetch(`${apiUrl}/api/v1.0/auth/logout`, {
         method: "POST",
         credentials: "include",

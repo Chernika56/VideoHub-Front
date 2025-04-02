@@ -24,7 +24,7 @@ let retryCount = 0;
 
 const disabled = ref(false);
 
-const apiUrl = useRuntimeConfig().public.API_BASE_URL
+const apiUrl = useRuntimeConfig().public.API_BASE_URL ?? window.location.origin
 
 const fetchStreamers = async () => {
     try {
