@@ -1,4 +1,8 @@
 <script setup>
+const route = useRoute();
+const router = useRouter();
+
+const apiUrl = useRuntimeConfig().public.API_BASE_URL ?? window.location.origin
 
 const camera = ref({
 	name: null,
@@ -29,7 +33,7 @@ const camera = ref({
 
 
 	//eventThumbnails: null,
-	enabled: false,
+	enabled: true,
 });
 
 const maxRetries = 5;
@@ -40,8 +44,6 @@ const organizations = ref([]);
 const presets = ref([]);
 const folders = ref([]);
 const errorMessage = ref();
-
-const apiUrl = useRuntimeConfig().public.API_BASE_URL ?? window.location.origin
 
 const fetchStreamers = async () => {
 	try {
@@ -57,7 +59,7 @@ const fetchStreamers = async () => {
 			if (!data.value) {
 				retryCount++;
 				console.warn(`Попытка ${retryCount}: Данные не загрузились, пробуем еще раз через 1 сек...`);
-				setTimeout(fetchVideos, 1000);
+				setTimeout(fetchStreamers, 1000);
 				return;
 			}
 
@@ -147,7 +149,7 @@ const fetchPresets = async () => {
 			if (!data.value) {
 				retryCount++;
 				console.warn(`Попытка ${retryCount}: Данные не загрузились, пробуем еще раз через 1 сек...`);
-				setTimeout(fetchFolders, 1000);
+				setTimeout(fetchPresets, 1000);
 				return;
 			}
 
@@ -167,6 +169,15 @@ const fetchPresets = async () => {
 onMounted(async () => {
 	await fetchStreamers();
 	await fetchOrganizations();
+
+	if (route.query.defaultOrg && organizations.value.length > 0) {
+		const defaultOrgId = Number(route.query.defaultOrg);
+		const exists = organizations.value.some(org => Number(org.id) === defaultOrgId);
+		if (exists) {
+			camera.value.organizationId = defaultOrgId;
+		}
+	}
+
 	await fetchFolders();
 	await fetchPresets();
 });
@@ -196,7 +207,7 @@ const thumbnailsOptions = ref([
 ]);
 
 const isValid = computed(() => {
-	return camera.value.title && camera.value.streamUrl && camera.value.streamerId && camera.value.organizationId 
+	return camera.value.title && camera.value.streamUrl && camera.value.streamerId && camera.value.organizationId
 		&& camera.value.folderId && camera.value.presetId;
 });
 
@@ -214,21 +225,25 @@ const submitForm = async () => {
 
 		console.log('Получение данных:', data.value, status)
 
-		navigateTo('/cameras')
+		navigateTo(`/camera/${data.value.name}`)
 	} else {
 		console.log('Заполните обязательные поля!');
 	}
 };
 
 const cancel = () => {
-	navigateTo('/cameras')
+	if (window.history.length > 1) {
+		router.back();
+	} else {
+		navigateTo('/cameras'); 
+	}
 }
 
 </script>
 
 <template>
-	<v-container class="fill-height d-flex justify-center align-center">
-		<v-sheet class="pa-4" width="1000" style="max-height: 90vh; overflow: auto;">
+	<v-container class="d-flex justify-center align-center">
+		<v-sheet class="pa-4" width="1200" style="max-height: 90vh; overflow: auto;">
 			<v-form @submit.prevent="submitForm">
 				<v-row>
 					<v-col cols="6">
@@ -266,21 +281,18 @@ const cancel = () => {
 							item-value="id" label="Лимит DVR" density="compact" outlined></v-select>
 						<v-text-field v-model.number="camera.dvrSpace" label="Пространство DVR, ГБ" type="number"
 							density="compact" outlined></v-text-field>
-						<v-select :items="thumbnailsOptions" item-title="name"
-							item-value="id" label="Точные миниатюры событий" density="compact" outlined></v-select>
+						<v-select :items="thumbnailsOptions" item-title="name" item-value="id"
+							label="Точные миниатюры событий" density="compact" outlined></v-select>
 						<!-- <v-select v-model="camera.eventThumbnails" :items="thumbnailsOptions" item-title="name"
 							item-value="id" label="Точные миниатюры событий" density="compact" outlined></v-select> -->
 					</v-col>
 
 					<v-col cols="6">
-						<label class="custom-checkbox">
-							<input type="checkbox" v-model="camera.motionDetectorEnabled">
-							Включить распознавание
-						</label>
-						<label class="custom-checkbox">
-							<input type="checkbox" v-model="camera.enabled">
-							Включена
-						</label>
+						<v-switch v-model="camera.motionDetectorEnabled" label="Включить распознавание"
+							density="compact" outlined
+							:class="{ 'switch-active': camera.motionDetectorEnabled }"></v-switch>
+						<v-switch v-model="camera.enabled" label="Включена" density="compact" outlined
+							:class="{ 'switch-active': camera.enabled }"></v-switch>
 						<!-- <v-checkbox v-model="camera.motionDetectorEnabled" label="Включить распознавание" density="compact"
                outlined></v-checkbox> -->
 						<!-- <v-checkbox v-model="camera.enabled" label="Включена" density="compact" outlined ></v-checkbox> -->
@@ -299,44 +311,12 @@ const cancel = () => {
 </template>
 
 <style scoped>
-.custom-checkbox {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	cursor: pointer;
-	font-size: 16px;
-	padding-top: 10px;
-	padding-bottom: 30px;
-}
-
-.custom-checkbox input {
-	appearance: none;
-	width: 20px;
-	height: 20px;
-	border: 2px solid #1976d2;
-	border-radius: 4px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	transition: background 0.2s;
-}
-
-.custom-checkbox input:checked {
-	background-color: #1976d2;
-	border-color: #1976d2;
-	position: relative;
-}
-
-.custom-checkbox input:checked::after {
-	content: "✔";
-	color: white;
-	font-size: 14px;
-	font-weight: bold;
-	position: absolute;
-}
-
 html,
 body {
 	overflow: hidden;
+}
+
+.switch-active .v-selection-control__input {
+	color: green !important;
 }
 </style>

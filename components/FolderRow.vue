@@ -41,7 +41,7 @@ const toggleFolder = () => {
                     :style="{ paddingLeft: `${(level + 1) * 20}px` }">
                     <span :class="['status-dot', getStatusClass(video.enabled)]"></span>
                     <!-- <span :class="['status-dot', getStatusClass(video.streamStatus.alive)]"></span> -->
-                    <nuxt-link :to="`/VideoPlayer/${video.name}`">
+                    <nuxt-link :to="`/camera/${video.name}`">
                         {{ video.title }}
                     </nuxt-link>
                 </td>

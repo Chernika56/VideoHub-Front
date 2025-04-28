@@ -1,32 +1,30 @@
 <script setup>
-const route = useRoute();
-const router = useRouter();
-
-const apiUrl = useRuntimeConfig().public.API_BASE_URL ?? window.location.origin
+const props = defineProps({
+    organization: String,
+});
 
 const users = ref([]);
-const userMemberships = ref({});
 
 const maxRetries = 3;
 let retryCount = 0;
 const errorMessage = ref({});
 
-
+const apiUrl = useRuntimeConfig().public.API_BASE_URL ?? window.location.origin
 
 const fetchUsers = async () => {
     try {
         if (retryCount < maxRetries) {
             let url = `${apiUrl}/api/v1.0/users`;
-            // if (props.organization !== '') {
-            //     url = `${apiUrl}/api/v1.0/organizations/${props.organization}/users`
-            // }
+            if (props.organization !== '') {
+                url = `${apiUrl}/api/v1.0/organizations/${props.organization}/users`
+            }
 
             const { data } = await useFetch(url, {
                 method: "GET",
                 credentials: 'include',
             });
 
-            // console.log(`Попытка ${retryCount + 1} (пользователи):`, data.value)
+            console.log(`Попытка ${retryCount + 1} (пользователи):`, data.value)
 
             if (!data.value) {
                 retryCount++;
@@ -36,15 +34,6 @@ const fetchUsers = async () => {
             }
 
             users.value = data.value;
-
-            userMemberships.value = {};
-            users.value.forEach(user => {
-                const org = user.organizations.find(o => o.id === Number(route.query.defaultOrg));
-                userMemberships.value[user.id] = {
-                    initial: org ? org.isMember : false, // как было изначально
-                    current: org ? org.isMember : false,  // текущее состояние чекбокса
-                };
-            });
 
             retryCount = 0
         } else {
@@ -89,6 +78,10 @@ const resetFilters = () => {
     };
 };
 
+const sendMessage = (user) => {
+    console.log(`Отправка сообщения пользователю ${user.login}`);
+};
+
 onMounted(() => {
     document.addEventListener('click', handleClickOutside);
 });
@@ -97,58 +90,24 @@ onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside);
 });
 
-const getUserOrganizationIsMember = (user) => {
-    return userMemberships.value[user.id]?.current ?? false;
-};
-
-const isUserInitiallyMember = (user) => {
-    return userMemberships.value[user.id]?.initial ?? false;
-};
-
-const toggleUserOrganizationIsMember = (user, value) => {
-    if (!isUserInitiallyMember(user)) { // только если пользователь НЕ был изначально
-        userMemberships.value[user.id].current = value;
-    }
-};
-
-
-const saveChanges = async () => {
-    const usersToAdd = Object.entries(userMemberships.value)
-        .filter(([_, membership]) => !membership.initial && membership.current);
-
-    for (const [userId] of usersToAdd) {
-        try {
-            await useFetch(`${apiUrl}/api/v1.0/organizations/${route.query.defaultOrg}/users/${userId}`, {
-                method: "PUT",
-                credentials: 'include',
-                body: JSON.stringify({
-                    isMember: true
-                }),
-            });
-            console.log(`Пользователь ${userId} успешно добавлен.`);
-        } catch (error) {
-            console.error(`Ошибка при добавлении пользователя ${userId}:`, error);
-        }
-    }
-
-    cancel();
-
-
-    // const { data, error, status } = await useFetch(`${apiUrl}/api/v1.0/organizations/${organization.value.id}`, {
-    //     method: "PUT",
-    //     body: user.value,
-    //     credentials: 'include',
-    // })
+const addUser = () => {
+    navigateTo({ path: '/addUser', query: { defaultOrg: props.organization } })
+    // navigateTo('/addUser')
 }
 
-const cancel = () => {
-    if (window.history.length > 1) {
-        router.back();
-    } else {
-        navigateTo(`/organization/${route.query.defaultOrg}`)
-    }
+const createUser = () => {
+    navigateTo({ path: '/createUser', query: { defaultOrg: props.organization } })
+    // navigateTo('/addUser')
 }
 
+const deleteUser = async (user) => {
+    const { data, error, status } = await useFetch(`${apiUrl}/api/v1.0/organizations/${props.organization}/users/${user.id}`, {
+        method: "DELETE",
+        credentials: 'include',
+    })
+
+    await fetchUsers();
+}
 
 </script>
 
@@ -157,8 +116,8 @@ const cancel = () => {
         <div class="toolbar">
             <h2 v-if="users.length === 0">Загрузка...</h2>
             <div class="buttons">
-                <button class="button" @click="saveChanges">Сохранить</button>
-                <button class="button" @click="cancel">Отменить</button>
+                <button class="button" @click="createUser">Создать пользавателя</button>
+                <button class="button" @click="addUser">Добавить пользавателя</button>
                 <button class="button" @click="toggleFilterMenu">🔍 Фильтр</button>
                 <div v-if="showFilterMenu" class="dropdown-menu" ref="filterMenu">
                     <input class="input-field" type="text" placeholder="🔍 Поиск..." v-model="filter.search">
@@ -171,22 +130,23 @@ const cancel = () => {
             <thead>
                 <tr>
                     <th class="wide-column align-left">Пользователь</th>
-                    <th class="narrow-column">Участник</th>
-                    <th class="narrow-column">EMAIL</th>
+                    <th class="narrow-column">Админ</th>
+                    <th class="narrow-column">Действия</th>
                 </tr>
             </thead>
             <tbody>
                 <tr v-for="user in filteredUsers" :key="user.id">
                     <td class="wide-column">
-                        {{ user.login }}
+                        <nuxt-link :to="`/user/${user.id}`">
+                            {{ user.login }}
+                        </nuxt-link>
                     </td>
                     <td class="narrow-column">
-                        <input type="checkbox" :checked="getUserOrganizationIsMember(user)"
-                            :disabled="isUserInitiallyMember(user)"
-                            @change="toggleUserOrganizationIsMember(user, $event.target.checked)">
+                        <input type="checkbox" :checked="user.permissions.organization.isAdmin" disabled>
                     </td>
                     <td class="narrow-column">
-                        {{ user.email }}
+                        <button @click="sendMessage(user)" class="message-button">Сообщение</button>
+                        <button @click="deleteUser(user)" class="delete-button">Удалить</button>
                     </td>
                 </tr>
             </tbody>
