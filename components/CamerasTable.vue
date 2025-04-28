@@ -211,9 +211,13 @@ const buildFolderTree = (folders, videos, organizations) => {
     const folderTree = [];
 
     folders.forEach(folder => {
+        const organization = Array.isArray(organizations)
+            ? organizations.find(org => org.id === folder.organizationId)
+            : (organizations.id === folder.organizationId ? organizations : null);
+
         folderMap.set(folder.id, {
             ...folder,
-            organizationName: organizations.find(org => org.id === folder.organizationId).title || 'Undefined',
+            organizationName: organization?.title || 'Undefined',
             cameras: videos.filter(video => video.folderId === folder.id),
             children: [],
             isOpen: true,
