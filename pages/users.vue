@@ -9,7 +9,7 @@ const maxRetries = 3;
 let retryCount = 0;
 const errorMessage = ref({});
 
-const apiUrl = useRuntimeConfig().public.apiBaseUrl ?? 'http://localhost:5201'
+const apiUrl = useRuntimeConfig().public.API_BASE_URL ?? window.location.origin
 
 const fetchOrganizations = async () => {
     try {
@@ -54,7 +54,7 @@ const fetchUsers = async () => {
             if (!data.value) {
                 retryCount++;
                 console.warn(`Попытка ${retryCount}: Данные не загрузились, пробуем еще раз через 1 сек...`);
-                setTimeout(fetchOrganizations, 1000);
+                setTimeout(fetchUsers, 1000);
                 return;
             }
 
@@ -158,7 +158,7 @@ onUnmounted(() => {
 });
 
 const addUser = () => {
-    navigateTo('/addUser')
+    navigateTo('/createUser')
 }
 
 </script>
@@ -168,7 +168,7 @@ const addUser = () => {
         <div class="toolbar">
             <h2 v-if="users.length === 0">Загрузка...</h2>
             <div class="buttons">
-                <button class="button" @click="addUser">Добавить камеру</button>
+                <button class="button" @click="addUser">Добавить пользавателя</button>
                 <button class="button" @click="toggleFilterMenu">🔍 Фильтр</button>
                 <div v-if="showFilterMenu" class="dropdown-menu" ref="filterMenu">
                     <input class="input-field" type="text" placeholder="🔍 Поиск..." v-model="filter.search">
@@ -183,7 +183,7 @@ const addUser = () => {
             </div>
         </div>
 
-        <table class="user-table">
+        <table class="users-table">
             <thead>
                 <tr>
                     <th class="wide-column align-left">Пользователь</th>
@@ -195,13 +195,23 @@ const addUser = () => {
             </thead>
             <tbody>
                 <tr v-for="user in filteredUsers" :key="user.id">
-                    <td class="wide-column">{{ user.login }}</td>
+                    <td class="wide-column">
+                        <nuxt-link :to="`/user/${user.id}`">
+                            {{ user.login }}
+                        </nuxt-link>
+                    </td>
                     <td class="wide-column">
                         <button class="org-button" @click="toggleOrganizationsMenu($event, user.organizations)">{{
                             getOrganizationTitle(user.organizations) }}...</button>
-                        <div v-if="showOrganizationsMenu" class="dropdown-menu" ref="organizationsMenu" :style="organizationsMenuStyle">
+                        <div v-if="showOrganizationsMenu" class="dropdown-menu organizations-menu"
+                            ref="organizationsMenu" :style="organizationsMenuStyle">
+                            <h3 class="menu-title">Организации</h3>
                             <ul>
-                                <li v-for="org in selectedOrganizations" :key="org.id">{{ org.title }}</li>
+                                <li v-for="org in selectedOrganizations" :key="org.id" class="menu-item">
+                                    <nuxt-link :to="`/organization/${org.id}`">
+                                        {{ org.title }}
+                                    </nuxt-link>
+                                </li>
                             </ul>
                         </div>
                     </td>
@@ -221,6 +231,18 @@ const addUser = () => {
 </template>
 
 <style scoped>
+.users-table {
+    border-collapse: collapse;
+}
+
+.users-table th,
+.users-table td {
+    word-wrap: break-word;
+    width: 10%;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
 .dropdown-menu {
     position: absolute;
     background: white;
@@ -239,10 +261,53 @@ const addUser = () => {
 .dropdown-menu ul {
     list-style: none;
     padding: 0;
+    margin:0 ;
 }
 
 .dropdown-menu li {
     margin-bottom: 10px;
+}
+
+.organizations-menu {
+    min-width: 220px;
+    max-width: 300px;
+    max-height: 300px;
+    padding: 15px;
+    border-radius: 8px;
+    background: #fafafa;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    animation: fadeIn 0.3s ease;
+}
+
+.menu-title {
+    margin-bottom: 10px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+}
+
+.menu-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menu-item {
+    padding: 8px 10px;
+    margin-bottom: 5px;
+    border-radius: 6px;
+    transition: background 0.2s;
+    cursor: default;
+    font-size: 14px;
+    color: #555;
+}
+
+.menu-item:hover {
+    background: #e0e0e0;
 }
 
 tbody {
