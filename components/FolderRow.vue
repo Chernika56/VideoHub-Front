@@ -121,8 +121,8 @@ const cancel = () => {
                 </td>
 
                 <td v-else-if="column.visible && key === 'streamer'" :class="key">
-                    {{ streamers[0].hostName }}
-
+                    
+                    {{ streamers.find(s => s.id === video.streamerId)?.hostName ?? 'Неизвестно' }}
                 </td>
 
                 <td v-else-if="column.visible && key === 'dvrSpace'" :class="key">
@@ -132,7 +132,7 @@ const cancel = () => {
         </tr>
 
         <template v-for="child in folder.children" :key="child.id">
-            <FolderRow :folder="child" :level="level + 1" :tableColumns="tableColumns" @refresh="emit('refresh')"/>
+            <FolderRow :folder="child" :level="level + 1" :tableColumns="tableColumns" :streamers="streamers" @refresh="emit('refresh')"/>
         </template>
     </template>
 
