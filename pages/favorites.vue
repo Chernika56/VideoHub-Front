@@ -1,4 +1,8 @@
 <script setup>
+definePageMeta({
+    title: 'Избранные',
+});
+
 // websocket = new WebSocket("ws://172.16.0.48/Cam_ATS-327-m96z0l1y/mse_ld?token=thisIsPersonalUserTokenAdmin");
 // websocket = new WebSocket("wss://camdvr1.1net.by/cam_ats-327-e8c9f87c61/mse_ld?token=3.7zYlynuNAAAAAAAAAAEABjDhbwpXM0hUyLVTV2zai0-Ti-Ktp6PCwuv4");
 

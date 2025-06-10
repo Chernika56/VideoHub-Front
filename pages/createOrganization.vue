@@ -2,6 +2,10 @@
 const apiUrl = useRuntimeConfig().public.API_BASE_URL ?? window.location.origin
 const authStore = useAuthStore();
 
+definePageMeta({
+    title: 'Создание организации',
+});
+
 const organization = ref({
     title: null,
     limits: {
@@ -87,6 +91,15 @@ const submitForm = async () => {
         body: {
             organizationId: data.value.id,
             title: `${organization.value.title}`,
+        },
+    });
+
+    await useFetch(`${apiUrl}/api/v1.0/organizations/${data.value.id}/users/${data.value.ownerId}`, {
+        method: 'PUT',
+        credentials: 'include',
+        body: {
+            isMember: true,
+            isAdmin: true,
         },
     });
 

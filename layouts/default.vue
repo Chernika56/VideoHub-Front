@@ -14,19 +14,19 @@ if (authStore.accessLevel === "User") {
     collectionNav.value = [
         { title: 'cameras', text: 'Камеры' },
         //{ title: 'images', text: 'Изображение' },
-        { title: 'favorites', text: 'Избранные' },
+        // { title: 'favorites', text: 'Избранные' },
         { title: 'mosaics', text: 'Мозаики' },
-        { title: 'map', text: 'Карта' },
-        { title: 'events', text: 'События' },
+        // { title: 'map', text: 'Карта' },
+        // { title: 'events', text: 'События' },
     ]
 } else if (authStore.accessLevel === "Admin") {
     collectionNav.value = [
         { title: 'cameras', text: 'Камеры' },
         //{ title: 'images', text: 'Изображение' },
-        { title: 'favorites', text: 'Избранные' },
+        // { title: 'favorites', text: 'Избранные' },
         { title: 'mosaics', text: 'Мозаики' },
-        { title: 'map', text: 'Карта' },
-        { title: 'events', text: 'События' },
+        // { title: 'map', text: 'Карта' },
+        // { title: 'events', text: 'События' },
         { title: 'users', text: 'Пользователи' },
         { title: 'organizations', text: 'Организации' },
         { title: 'presets', text: 'Пресеты камер' },

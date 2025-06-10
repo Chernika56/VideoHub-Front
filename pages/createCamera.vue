@@ -2,6 +2,10 @@
 const route = useRoute();
 const router = useRouter();
 
+definePageMeta({
+    title: 'Создание камеры',
+});
+
 const apiUrl = useRuntimeConfig().public.API_BASE_URL ?? window.location.origin
 
 const camera = ref({
@@ -166,6 +170,17 @@ const fetchPresets = async () => {
 	}
 }
 
+const filteredFolders = computed(() => {
+	return folders.value.filter(folder => folder.organizationId === camera.value.organizationId);
+});
+
+watch(() => camera.value.organizationId, () => {
+	const availableFolderIds = filteredFolders.value.map(f => f.id);
+	if (!availableFolderIds.includes(camera.value.folderId)) {
+		camera.value.folderId = null;
+	}
+});
+
 onMounted(async () => {
 	await fetchStreamers();
 	await fetchOrganizations();
@@ -266,10 +281,10 @@ const cancel = () => {
 						<v-select v-model="camera.organizationId" :items="organizations" item-title="title"
 							item-value="id" label="Организация" :rules="[v => !!v || 'Обязательное поле']" required
 							density="compact" outlined></v-select>
-						<v-select v-model="camera.presetId" :items="presets" label="Пресет" item-title="title"
+						<v-select v-model="camera.folderId" :items="filteredFolders" label="Папка" item-title="title"
 							item-value="id" :rules="[v => !!v || 'Обязательное поле']" required density="compact"
 							outlined></v-select>
-						<v-select v-model="camera.folderId" :items="folders" label="Папка" item-title="title"
+						<v-select v-model="camera.presetId" :items="presets" label="Пресет" item-title="title"
 							item-value="id" :rules="[v => !!v || 'Обязательное поле']" required density="compact"
 							outlined></v-select>
 					</v-col>

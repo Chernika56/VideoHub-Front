@@ -225,8 +225,8 @@ const buildFolderTree = (folders, videos, organizations) => {
     });
 
     folderMap.forEach((folder, id) => {
-        if (folder.parentId && folderMap.has(folder.parentId)) {
-            folderMap.get(folder.parentId).children.push(folder);
+        if (folder.parentsId && folderMap.has(folder.parentsId)) {
+            folderMap.get(folder.parentsId).children.push(folder);
         } else {
             folderTree.push(folder);
         }
@@ -240,8 +240,10 @@ const buildFolderTree = (folders, videos, organizations) => {
         });
     };
 
-    return removeEmptyFolders(folderTree)
-        .sort((a, b) => a.organizationName.localeCompare(b.organizationName));
+    return folderTree.sort((a, b) => a.organizationName.localeCompare(b.organizationName));
+
+    // return removeEmptyFolders(folderTree)
+    //     .sort((a, b) => a.organizationName.localeCompare(b.organizationName));
 };
 
 
@@ -253,6 +255,10 @@ onMounted(async () => {
     await fetchFolders();
     await fetchVideos();
 });
+
+const refreshFolders = async () => {
+    await fetchFolders();
+}
 
 const showColumnsMenu = ref(false);
 const showFilterMenu = ref(false);
@@ -388,7 +394,7 @@ const addCamera = () => {
             </thead>
             <tbody>
                 <template v-for="folder in folderTree" :key="folder.id">
-                    <FolderRow :folder="folder" :level="0" :tableColumns="tableColumns" :streamers="streamers" />
+                    <FolderRow :folder="folder" :level="0" :tableColumns="tableColumns" :streamers="streamers" @refresh="refreshFolders()"/>
                 </template>
             </tbody>
         </table>

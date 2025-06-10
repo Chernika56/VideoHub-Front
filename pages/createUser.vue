@@ -4,6 +4,10 @@ const router = useRouter();
 
 const apiUrl = useRuntimeConfig().public.API_BASE_URL ?? window.location.origin
 
+definePageMeta({
+    title: 'Создание пользователя',
+});
+
 const user = ref({
     login: '',
     password: '',

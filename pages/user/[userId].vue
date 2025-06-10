@@ -3,6 +3,10 @@ const apiUrl = useRuntimeConfig().public.API_BASE_URL ?? window.location.origin
 const route = useRoute();
 const router = useRouter();
 
+definePageMeta({
+    title: computed(() => user.value?.login || 'Пользователь'),
+});
+
 const errorMessage = ref({});
 const maxRetries = 5;
 let retryCount = 0;
@@ -249,18 +253,8 @@ const deleteUser = async () => {
                                         <v-btn :value="'Admin'"
                                             :class="{ 'btn-active': user.accessLevel === 'Admin' }">Администратор</v-btn>
                                         <v-btn :value="'User'"
-                                            :class="{ 'btn-active': user.accessLevel === 'User' }">Только
-                                            для
-                                            чтения</v-btn>
+                                            :class="{ 'btn-active': user.accessLevel === 'User' }">Только для чтения</v-btn>
                                     </v-btn-toggle>
-                                </v-col>
-                                <v-col class="d-flex" cols="6">
-                                    <v-btn type="submit" :disabled="!isValid" color="primary">Сохранить
-                                        изменения</v-btn>
-                                    <v-btn @click="cancel" class="ml-3">Отмена</v-btn>
-                                </v-col>
-                                <v-col class="d-flex justify-end" cols="6">
-                                    <v-btn @click="deleteUser" color="red">Удалить пользователя</v-btn>
                                 </v-col>
                             </v-row>
                         </v-form>
@@ -332,6 +326,17 @@ const deleteUser = async () => {
                 </v-container>
             </v-window-item>
         </v-window>
+
+        <v-row class="mt-4 align-center">
+            <v-col class="d-flex" cols="6">
+                <v-btn @click="submitForm" type="submit" :disabled="!isValid" color="primary">Сохранить
+                    изменения</v-btn>
+                <v-btn @click="cancel" class="ml-3">Отмена</v-btn>
+            </v-col>
+            <v-col class="d-flex justify-end" cols="6">
+                <v-btn @click="deleteUser" color="red">Удалить пользователя</v-btn>
+            </v-col>
+        </v-row>
     </v-container>
 </template>
 

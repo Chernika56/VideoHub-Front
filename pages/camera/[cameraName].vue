@@ -170,7 +170,7 @@ const fetchVideoUrl = async () => {
         videoRef.value,
         videoUrl,
         {
-            debug: true,
+            debug: false,
             wsReconnect: true,
             retryMuted: true,
             // onMediaInfo: (info) => console.log('📺 MediaInfo:', info),
@@ -195,24 +195,24 @@ const getStreamerApiUrl = async (streamerId) => {
     return data.value?.apiUrl;
 };
 
-watch(stream, (newStream) => {
-    if (newStream) {
-        useHead({ title: newStream.title || 'Камера' });
-    }
-})
+watch(() => stream.value?.title, (newTitle) => {
+    useHead({ title: newTitle || 'Камера' });
+});
 
 onMounted(async () => {
     await fetchVideoUrl();
-    await fetchStreamers();
-    await fetchOrganizations();
-    await fetchFolders();
-    await fetchPresets();
+    fetchStreamers();
+    fetchOrganizations();
+    fetchFolders();
+    fetchPresets();
 });
 
 onBeforeUnmount(() => {
     if (player.value) {
         // console.log('🛑 Останавливаем поток')
         player.value.stop()
+        player.value.destroy?.();
+        player.value = null;
     }
 })
 
@@ -234,29 +234,29 @@ const stopPlayback = () => {
     // console.log('⏹️ Воспроизведение остановлено')
 }
 
-const dvrDepthOptions = ref([
+const dvrDepthOptions = [
     { id: null, name: "DVR отключен" },
     { id: 1, name: "1 день" },
     { id: 2, name: "2 дня" },
     { id: 3, name: "3 дня" },
     { id: 7, name: "7 дней" },
-]);
+];
 
-const dvrLockDaysOptions = ref([
+const dvrLockDaysOptions = [
     { id: null, name: "DVR отключен" },
     { id: 1, name: "1 день" },
     { id: 2, name: "2 дня" },
     { id: 3, name: "3 дня" },
     { id: 7, name: "7 дней" },
-]);
+];
 
-const thumbnailsOptions = ref([
+const thumbnailsOptions = [
     { id: null, name: "Не использовать" },
     { id: 1, name: "1 день" },
     { id: 2, name: "2 дня" },
     { id: 3, name: "3 дня" },
     { id: 7, name: "7 дней" },
-]);
+];
 
 const isValid = computed(() => {
     return stream.value && stream.value.title && stream.value.streamUrl && stream.value.streamerId && stream.value.organizationId

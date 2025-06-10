@@ -4,14 +4,16 @@ const router = useRouter();
 
 const apiUrl = useRuntimeConfig().public.API_BASE_URL ?? window.location.origin
 
+definePageMeta({
+    title: 'Добавление пользователя',
+});
+
 const users = ref([]);
 const userMemberships = ref({});
 
 const maxRetries = 3;
 let retryCount = 0;
 const errorMessage = ref({});
-
-
 
 const fetchUsers = async () => {
     try {
