@@ -139,7 +139,7 @@ const submitForm = async () => {
 
 		const { data, error, status } = await useFetch(`${apiUrl}/api/v1.0/organizations/${organization.value.id}`, {
 			method: "PUT",
-			body: user.value,
+			body: organization.value,
 			credentials: 'include',
 		})
 
