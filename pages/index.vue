@@ -4,15 +4,20 @@ definePageMeta({
   title: 'Главная',
 })
 
-const route = useRoute()
+const router = useRouter()
+
+onMounted(() => {
+  router.push('/cameras')
+})
 </script>
 
 <template>
-  <div>
+  <div><h1>Перенаправление...</h1></div>
+  <!-- <div>
     <h1>Nuxt Routing set up successfully!</h1>
     <p>Current route: {{ route.path }}</p>
     <a href="https://nuxt.com/docs/getting-started/routing" target="_blank">Learn more about Nuxt Routing</a>
-  </div>
+  </div> -->
 </template>
 
 <style scoped>

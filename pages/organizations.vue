@@ -1,6 +1,10 @@
 <script setup>
 const apiUrl = useRuntimeConfig().public.API_BASE_URL ?? window.location.origin
 
+definePageMeta({
+    title: 'Организации',
+});
+
 const maxRetries = 3;
 let retryCount = 0;
 const errorMessage = ref({});

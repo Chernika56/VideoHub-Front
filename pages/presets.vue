@@ -1,5 +1,7 @@
 <script setup>
-
+definePageMeta({
+    title: 'Пресеты',
+});
 </script>
 
 <template>

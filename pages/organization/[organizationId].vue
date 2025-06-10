@@ -4,6 +4,10 @@ const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
 
+definePageMeta({
+    title: 'Организация',
+})
+
 const errorMessage = ref({});
 const maxRetries = 5;
 let retryCount = 0;
@@ -224,8 +228,7 @@ const deleteOrg = async () => {
 
             <v-window-item value="mosaics">
                 <v-container>
-                    <!-- Мозаики -->
-                    <v-alert type="info">Мозаики здесь</v-alert>
+                    <MosaicsTable :organization="route.params.organizationId" />
                 </v-container>
             </v-window-item>
         </v-window>

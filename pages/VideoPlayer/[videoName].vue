@@ -13,8 +13,9 @@ definePageMeta({
     //title: 'Камера',
 });
 
+const player = ref();
 const stream = ref({});
-const videoUrl = ref({});
+const videoUrl = ref();
 const errorMessage = ref({});
 const maxRetries = 3;
 let retryCount = 0;
@@ -62,7 +63,7 @@ const fetchVideoUrl = async () => {
         const durationInSeconds = Math.round(endDate - startDate) / 1000;
         const index = `index-${startTime}-${durationInSeconds}.m3u8`;
         videoUrl.value = stream.value.videoUrl.replace('index.m3u8', index);
-        // videoUrl.value = stream.value.videoUrl;
+        //videoUrl.value = stream.value.videoUrl;
         //videoUrl.value = "http://172.16.0.48/test/embed.html"
         //videoUrl.value = "http://172.16.0.48/demo/mpegts/index.m3u8"
 
@@ -110,9 +111,10 @@ onMounted(async () => {
     <div>
         <h1 class="video-title">Видео: {{ stream?.title || 'Загрузка...' }}</h1>
         <div class="video-player-container">
-            <VueVideoPlayer ref="player" class="video-js" v-if="videoUrl != null" :src="videoUrl"
-                :poster="stream?.previewUrl" controls
-                aspectRatio="16:9" :playbackRates="[0.5, 1, 2, 4, 8, 16]" type="application/x-mpegURL"/>
+            <VueVideoPlayer ref="player" v-if="videoUrl != null" :src="videoUrl" controls aspectRatio="16:9" />
+            <!-- <VueVideoPlayer ref="player" class="video-js" v-if="videoUrl != null" :src="videoUrl"
+                :poster="stream?.previewUrl" controls aspectRatio="16:9" :playbackRates="[0.5, 1, 2, 4, 8, 16]"
+                type="application/x-mpegURL" /> -->
         </div>
         <div class="date-time-container">
             <h2>Выбор периода с датой и временем</h2>

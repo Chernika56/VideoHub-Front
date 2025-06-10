@@ -13,9 +13,9 @@ const toggleDropdown = () => {
 
 <template>
   <div class="rightColumn">
-    <button type="button" class="languageButton">
+    <!-- <button type="button" class="languageButton">
       RU
-    </button>
+    </button> -->
     
     <button type="button" class="profileButton" @click="toggleDropdown">
       Профиль

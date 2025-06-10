@@ -1,5 +1,7 @@
 <script setup>
-
+definePageMeta({
+    title: 'События',
+});
 </script>
 
 <template>

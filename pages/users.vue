@@ -1,6 +1,10 @@
 <script setup>
 const users = ref([]);
 
+definePageMeta({
+    title: 'Пользователи',
+});
+
 const organizations = ref([]);
 const selectedOrganizations = ref([]);
 const organizationsMenuStyle = ref({ top: '0px', left: '0px' });
@@ -60,12 +64,12 @@ const fetchUsers = async () => {
 
             data.value.forEach(u => {
                 if (u.accessLevel === "Admin") {
-                u.isAdmin = true;
-                u.isReadOnly = false;
-            } else if (u.accessLevel === "User") {
-                u.isAdmin = false;
-                u.isReadOnly = true;
-            }
+                    u.isAdmin = true;
+                    u.isReadOnly = false;
+                } else if (u.accessLevel === "User") {
+                    u.isAdmin = false;
+                    u.isReadOnly = true;
+                }
             });
 
             users.value = data.value;
@@ -87,7 +91,7 @@ onMounted(async () => {
 });
 
 const filteredUsers = computed(() => {
-    return users.value.filter(user => 
+    return users.value.filter(user =>
         (!filter.value.search || user.login.includes(filter.value.search)) &&
         (!filter.value.organizationId || user.organizations.some(org => org.id === filter.value.organizationId))
     );
@@ -145,8 +149,50 @@ const resetFilters = () => {
     };
 };
 
-const sendMessage = (user) => {
-    console.log(`Отправка сообщения пользователю ${user.login}`);
+const showMessageModal = ref(false);
+const messageForm = ref({
+    userId: null,
+    title: '',
+    body: '',
+    type: 'info',
+    isPush: true,
+    isDashboard: true
+});
+
+const openMessageModal = (user) => {
+    messageForm.value = {
+        userId: user.id,
+        title: '',
+        body: '',
+        type: 'info',
+        isPush: true,
+        isDashboard: true
+    };
+    showMessageModal.value = true;
+};
+
+const closeMessageModal = () => {
+    showMessageModal.value = false;
+};
+
+const sendMessageToUser = async () => {
+    try {
+        const { error } = await useFetch(`${apiUrl}/api/v1.0/messages`, {
+            method: 'POST',
+            body: messageForm.value,
+            credentials: 'include'
+        });
+
+        if (!error.value) {
+            // alert('Сообщение отправлено');
+            closeMessageModal();
+        } else {
+            alert('Ошибка при отправке сообщения');
+        }
+    } catch (err) {
+        console.error('Ошибка отправки:', err);
+        alert('Ошибка при отправке сообщения');
+    }
 };
 
 onMounted(() => {
@@ -222,12 +268,46 @@ const addUser = () => {
                         <input type="checkbox" :checked="user.isReadOnly" disabled>
                     </td>
                     <td class="narrow-column">
-                        <button @click="sendMessage(user)" class="message-button">Сообщение</button>
+                        <button @click="openMessageModal(user)" class="message-button">Сообщение</button>
                     </td>
                 </tr>
             </tbody>
         </table>
     </div>
+    <div v-if="showMessageModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Отправка сообщения</h3>
+            <label>Заголовок</label>
+            <input v-model="messageForm.title" class="input-field" placeholder="Заголовок" />
+
+            <label>Текст</label>
+            <textarea v-model="messageForm.body" class="input-field" placeholder="Текст сообщения"></textarea>
+
+            <label>Тип</label>
+            <select v-model="messageForm.type" class="input-field">
+                <option value="info">Информация</option>
+                <option value="warning">Предупреждение</option>
+                <option value="error">Ошибка</option>
+            </select>
+
+            <div class="checkbox-row">
+                <label>
+                    <input type="checkbox" v-model="messageForm.isPush" />
+                    Push
+                </label>
+                <label>
+                    <input type="checkbox" v-model="messageForm.isDashboard" />
+                    Dashboard
+                </label>
+            </div>
+
+            <div class="modal-actions">
+                <button class="button" @click="sendMessageToUser">Отправить</button>
+                <button class="button" @click="closeMessageModal">Отмена</button>
+            </div>
+        </div>
+    </div>
+
 </template>
 
 <style scoped>
@@ -253,15 +333,15 @@ const addUser = () => {
     display: flex;
     flex-direction: column;
     max-width: 100px;
-    max-height: 300px; 
-    overflow-y: auto; 
+    max-height: 300px;
+    overflow-y: auto;
     z-index: 10;
 }
 
 .dropdown-menu ul {
     list-style: none;
     padding: 0;
-    margin:0 ;
+    margin: 0;
 }
 
 .dropdown-menu li {
@@ -412,5 +492,63 @@ tbody {
 
 .button:hover {
     background: #0056b3;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 600px;
+    max-width: 90%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content h3 {
+    margin-bottom: 15px;
+}
+
+.modal-content textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.modal-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.checkbox-row {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.checkbox-row label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.checkbox-row input[type="checkbox"] {
+    vertical-align: middle;
+    transform: translateY(-5px);
 }
 </style>

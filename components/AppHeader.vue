@@ -4,7 +4,7 @@
 <template>
     <header class="topNavigation">
         <nuxt-link to="/" class="logo">
-            <img alt="Vue logo" class="logoImg" src="@/assets/logo.svg" />
+            <!-- <img alt="Vue logo" class="logoImg" src="@/assets/logo.svg" /> -->
         </nuxt-link>
         <MainColumn />
         <RightColumn />

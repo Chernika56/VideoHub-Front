@@ -3,37 +3,32 @@ const props = defineProps({
     organization: String,
 });
 
-const users = ref([]);
-
-const maxRetries = 3;
-let retryCount = 0;
-const errorMessage = ref({});
-
 const apiUrl = useRuntimeConfig().public.API_BASE_URL ?? window.location.origin
+const errorMessage = ref('');
+const maxRetries = 5;
+let retryCount = 0;
 
-const fetchUsers = async () => {
+const mosaics = ref([]);
+const organizations = ref([]);
+
+const fetchMosaics = async () => {
     try {
         if (retryCount < maxRetries) {
-            let url = `${apiUrl}/api/v1.0/users`;
-            if (props.organization !== '') {
-                url = `${apiUrl}/api/v1.0/organizations/${props.organization}/users`
-            }
-
-            const { data } = await useFetch(url, {
+            const { data } = await useFetch(`${apiUrl}/api/v1.0/mosaics?organizationId=${props.organization}`, {
                 method: "GET",
                 credentials: 'include',
             });
 
-            console.log(`Попытка ${retryCount + 1} (пользователи):`, data.value)
+            console.log(`Попытка ${retryCount + 1} (мозаики):`, data.value)
 
             if (!data.value) {
                 retryCount++;
                 console.warn(`Попытка ${retryCount}: Данные не загрузились, пробуем еще раз через 1 сек...`);
-                setTimeout(fetchUsers, 1000);
+                setTimeout(fetchMosaics, 1000);
                 return;
             }
 
-            users.value = data.value;
+            mosaics.value = data.value;
 
             retryCount = 0
         } else {
@@ -41,18 +36,50 @@ const fetchUsers = async () => {
             console.error(errorMessage.value)
         }
     } catch (error) {
-        errorMessage.value = 'Ошибка загрузки пользователей';
-        console.error("Ошибка загрузки пользователей:", error);
+        errorMessage.value = 'Ошибка загрузки мозаик';
+        console.error("Ошибка загрузки мозаик:", error);
+    }
+};
+
+const fetchOrganizations = async () => {
+    try {
+        if (retryCount < maxRetries) {
+            const { data } = await useFetch(`${apiUrl}/api/v1.0/organizations`, {
+                method: "GET",
+                credentials: 'include',
+            });
+
+            console.log(`Попытка ${retryCount + 1} (организации):`, data.value)
+
+            if (!data.value) {
+                retryCount++;
+                console.warn(`Попытка ${retryCount}: Данные не загрузились, пробуем еще раз через 1 сек...`);
+                setTimeout(fetchOrganizations, 1000);
+                return;
+            }
+
+            organizations.value = data.value
+            retryCount = 0
+        } else {
+            errorMessage.value = 'Превышено число попыток'
+            console.error(errorMessage.value)
+        }
+
+    } catch (error) {
+        errorMessage.value = 'Ошибка загрузки организаций';
+        console.error('Ошибка загрузки организаций:', error);
     }
 };
 
 onMounted(async () => {
-    await fetchUsers();
+    await fetchMosaics();
+    await fetchOrganizations();
 });
 
-const filteredUsers = computed(() => {
-    return users.value.filter(user =>
-        (!filter.value.search || user.login.toLowerCase().includes(filter.value.search.toLowerCase()))
+const filteredMosaics = computed(() => {
+    return mosaics.value.filter(mosaic =>
+        (!filter.value.search || mosaic.title.toLowerCase().includes(filter.value.search.toLowerCase())) &&
+        (!filter.value.organizationId || mosaic.organizationId === filter.value.organizationId)
     );
 });
 
@@ -78,10 +105,6 @@ const resetFilters = () => {
     };
 };
 
-const sendMessage = (user) => {
-    console.log(`Отправка сообщения пользователю ${user.login}`);
-};
-
 onMounted(() => {
     document.addEventListener('click', handleClickOutside);
 });
@@ -90,23 +113,17 @@ onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside);
 });
 
-const addUser = () => {
-    navigateTo({ path: '/addUser', query: { defaultOrg: props.organization } })
-    // navigateTo('/addUser')
+const createMosaic = () => {
+    navigateTo({ path: '/createMosaic', query: { defaultOrg: props.organization } })
 }
 
-const createUser = () => {
-    navigateTo({ path: '/createUser', query: { defaultOrg: props.organization } })
-    // navigateTo('/addUser')
-}
-
-const deleteUser = async (user) => {
-    const { data, error, status } = await useFetch(`${apiUrl}/api/v1.0/organizations/${props.organization}/users/${user.id}`, {
+const deleteMosaic = async (mosaic) => {
+    const { data, error, status } = await useFetch(`${apiUrl}/api/v1.0/mosaics/${mosaic.id}`, {
         method: "DELETE",
         credentials: 'include',
     })
 
-    await fetchUsers();
+    await fetchMosaics();
 }
 
 </script>
@@ -114,10 +131,9 @@ const deleteUser = async (user) => {
 <template>
     <div class="pageContent">
         <div class="toolbar">
-            <h2 v-if="users.length === 0">Загрузка...</h2>
+            <h2 v-if="mosaics.length === 0">Загрузка...</h2>
             <div class="buttons">
-                <button class="button" @click="createUser">Создать пользавателя</button>
-                <button class="button" @click="addUser">Добавить пользавателя</button>
+                <button class="button" v-if="organization !== ''" @click="createMosaic">Создать Мозаику</button>
                 <button class="button" @click="toggleFilterMenu">🔍 Фильтр</button>
                 <div v-if="showFilterMenu" class="dropdown-menu" ref="filterMenu">
                     <input class="input-field" type="text" placeholder="🔍 Поиск..." v-model="filter.search">
@@ -126,27 +142,32 @@ const deleteUser = async (user) => {
             </div>
         </div>
 
-        <table class="users-table">
+        <table class="mosaics-table">
             <thead>
                 <tr>
-                    <th class="wide-column align-left">Пользователь</th>
-                    <th class="narrow-column">Админ</th>
-                    <th class="narrow-column">Действия</th>
+                    <th class="wide-column align-left">Название</th>
+                    <th class="narrow-column">Организация</th>
+                    <th class="narrow-column">Тип</th>
+                    <th class="narrow-column" v-if="organization !== ''" >Действия</th>
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="user in filteredUsers" :key="user.id">
+                <tr v-for="mosaic in filteredMosaics" :key="mosaic.id">
                     <td class="wide-column">
-                        <nuxt-link :to="`/user/${user.id}`">
-                            {{ user.login }}
+                        <nuxt-link :to="`/mosaic/${mosaic.id}`">
+                            {{ mosaic.title }}
                         </nuxt-link>
                     </td>
                     <td class="narrow-column">
-                        <input type="checkbox" :checked="user.permissions.organization.isAdmin" disabled>
+                        <nuxt-link :to="`/organization/${mosaic.organizationId}`">
+                            {{ organizations.find(org => org.id === mosaic.organizationId)?.title ?? 'Неизвестно' }}
+                        </nuxt-link>
                     </td>
                     <td class="narrow-column">
-                        <button @click="sendMessage(user)" class="message-button">Сообщение</button>
-                        <button @click="deleteUser(user)" class="delete-button">Удалить</button>
+                        {{ mosaic.type }}
+                    </td>
+                    <td class="narrow-column" v-if="organization !== ''">
+                        <button @click="deleteMosaic(mosaic)" class="delete-button">Удалить</button>
                     </td>
                 </tr>
             </tbody>
@@ -154,13 +175,16 @@ const deleteUser = async (user) => {
     </div>
 </template>
 
-<style scoped>
-.users-table {
-    border-collapse: collapse;
+<style>
+.mosaics-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
 }
 
-.users-table th,
-.users-table td {
+
+.mosaics-table th,
+.mosaics-table td {
     word-wrap: break-word;
     width: 10%;
     padding: 10px;
